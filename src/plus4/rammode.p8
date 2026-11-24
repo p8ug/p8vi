@@ -170,13 +170,17 @@ _low_end
     }
 }
 
-; (see above) RAM mode before main.start
+; (see above) RAM mode before main.start.  The library's init_system ran
+; first, still in ROM mode: it reads the colours from plus4.color_table,
+; which may be above $8000 (p8c puts the library's data at the end of the
+; program), where it read the ROM.  So it runs again in RAM mode.
 p8_sys_startup {
     %option merge
 
     asmsub init_system_phase2() {
         %asm {{
             jsr  p8b_rammode.p8s_start
+            jsr  p8_sys_startup.init_system
             cld
             clc
             clv

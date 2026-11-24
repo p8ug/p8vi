@@ -429,7 +429,17 @@ PET = {'EMU': ['xpet', '-default', '-minimized', '-model', '4032', '-sounddev', 
 # at $0c00
 PLUS4 = {'EMU': ['xplus4', '-default', '-minimized', '-sounddev', 'dummy', '-warp', '+autostart-warp',
                  '-drive8type', '1541'],
-         'EXIT_POKE': 'poke 64975,0', 'SCREEN_DUMP': 'm 0c00 0fe7'}
+         'EXIT_POKE': 'poke 64975,0', 'SCREEN_DUMP': 'm 0c00 0fe7',
+         # the screen tests also check the colours the library's init_system
+         # sets (plus4.color_table: border 6, background 0, text 7), which a
+         # screen dump can't see: what, the monitor command, the colour
+         # every byte must have, and the bits that count (the TED's
+         # registers read back with bit 7 set).  p8vi starts in ROM mode
+         # and reads the table with the ROM in: above $8000 it read the
+         # ROM, and the screen was black on black (src/plus4/rammode.p8)
+         'COLOURS': [('border', 'm ff19 ff19', 0x46, 0x7f),
+                     ('background', 'm ff15 ff15', 0x10, 0x7f),
+                     ('colour memory', 'm 0800 0be7', 0x77, 0xff)]}
 # the C128 (--machine c128): debug cartridge at $d7ff and the 40 column
 # screen at $0400, as on the C64.  (-minimized hides both its windows, the
 # VIC-II's and the VDC's)
@@ -689,8 +699,31 @@ def wait_for_editor(port, timeout=300):
     return False
 
 
+# (the machine's COLOURS, see PLUS4) the colours to check after a screen test
+COLOURS = []
+
+
+def check_colours(port):
+    """The machine's COLOURS that are wrong, as lines for the report; None
+    if the monitor didn't answer"""
+    if not COLOURS:
+        return []
+    reply = monitor(port, [cmd for _, cmd, _, _ in COLOURS], 10)
+    if reply is None:
+        return None
+    lines = []
+    for (what, cmd, want, mask), r in zip(COLOURS, reply):
+        got = screen_bytes(r) if cmd.startswith('m ') else b''
+        wrong = [b for b in got if (b ^ want) & mask]
+        if not got or wrong:
+            lines.append(f'  {what}: want ${want:02x}, got ' +
+                         (f'${wrong[0]:02x} in {len(wrong)} of {len(got)} bytes' if got else 'nothing'))
+    return lines
+
+
 def screen_after(args, base, port, text, keys):
-    """Type keys, let the emulator run args.cycles cycles, dump the screen."""
+    """Type keys, let the emulator run args.cycles cycles, dump the screen.
+    Returns the screen and the wrong colours (check_colours), or None."""
     d64 = base + '.d64'
     make_disk(d64, args.prg, text)
     with open(base + '.log', 'wb') as log:
@@ -722,7 +755,11 @@ def screen_after(args, base, port, text, keys):
                 for _ in range(5):
                     scr = dump_screen(port)
                     if scr:
-                        return scr
+                        for _ in range(5):
+                            colours = check_colours(port)
+                            if colours is not None:
+                                return scr, colours
+                        return None
                 return None
         return None
     finally:
@@ -737,8 +774,11 @@ def run_screen(args, job):
     a = screen_after(args, base + '-a', port, text, keys)
     b = screen_after(args, base + '-b', port + 1, text, keys + r'\x0c')
     cells = COLUMNS * 25
-    if a is None or b is None or len(a) != cells or len(b) != cells:
+    if a is None or b is None or len(a[0]) != cells or len(b[0]) != cells:
         return name, False, ['  no screen dump (VICE monitor did not answer)']
+    (a, colours), (b, _) = a, b
+    if colours:
+        return name, False, colours
     # both must be the editor in nav mode, which shows "line,col" in the
     # status row, or the run didn't get through its keys
     for scr in (a, b):
@@ -775,12 +815,13 @@ def main():
     ap.add_argument('--paged', action='store_true',
                     help='also the REU suites (more text than main RAM holds) without an REU: the disk build')
     args = ap.parse_args()
-    global FONT, EMU, EXIT_POKE, SCREEN_DUMP, COLUMNS, MONITOR_KEYS, FILE_PORTS
+    global FONT, EMU, EXIT_POKE, SCREEN_DUMP, COLUMNS, MONITOR_KEYS, FILE_PORTS, COLOURS
     machine = {'pet': PET, 'plus4': PLUS4, 'c128': C128, 'c128-80': C128_80}.get(args.machine)
     if machine:
         EMU, EXIT_POKE, SCREEN_DUMP = machine['EMU'], machine['EXIT_POKE'], machine['SCREEN_DUMP']
         COLUMNS = machine.get('COLUMNS', 40)
         MONITOR_KEYS = machine.get('MONITOR_KEYS', False)
+        COLOURS = machine.get('COLOURS', [])
     FILE_PORTS = itertools.count(args.port + 500)
     if args.font:
         FONT = os.path.abspath(args.font)
