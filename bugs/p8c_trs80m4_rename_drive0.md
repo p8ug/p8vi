@@ -1,6 +1,6 @@
 # p8c, trs80m4: diskio.rename fails for a file on drive 0
 
-**Status:** open (2026-11-23).  Found by p8vi's `make test-all` with p8c:
+**Status:** fixed in p8c 2bcb80f (2026-11-23: the Model 4 renames with the DOS's @RENAM; it copied and deleted, which failed on a full system disk).  Found by p8vi's `make test-all` with p8c:
 `test-trs80m4x`'s recovery tests (tests/trs80/rectest.py) save nothing.
 
 ## What happens

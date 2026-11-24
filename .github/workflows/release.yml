@@ -1,0 +1,51 @@
+# A GitHub release for a version tag (v0.6.0 and so on): the zip of release/.
+#
+# Nothing is built here: `make release` builds every version, runs the tests
+# and copies the programs to release/, which is committed.  So: bump the
+# version on the splash (src/editor.p8), make release, commit, then
+#
+#     git tag v0.6.0 && git push origin v0.6.0
+#
+# The tag must match the splash's version, so a release can't carry the
+# programs of another one.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check release/ and the version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls release/p8vi-c64.prg release/QUICKSTART.md > /dev/null
+          if ! grep -q "\"$TAG " src/editor.p8; then
+            echo "the splash in src/editor.p8 is not $TAG:"
+            grep -n '"v[0-9]' src/editor.p8
+            exit 1
+          fi
+
+      - name: Zip release/
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir "p8vi-$TAG"
+          cp -R release/. LICENSE "p8vi-$TAG/"
+          zip -r "p8vi-$TAG.zip" "p8vi-$TAG"
+          unzip -l "p8vi-$TAG.zip"
+
+      - name: Create the release
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" "p8vi-$TAG.zip" --title "p8vi $TAG" --generate-notes

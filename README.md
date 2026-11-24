@@ -198,7 +198,7 @@ The useful `make` targets are:
 | `make c64`   | Compile for the C64 and run it in VICE                    |
 | `make cx16`  | Compile for the Commander X16 and run it in x16emu        |
 | `make test-coco`, `test-coco3` | The file suites on a Color Computer 2 and 3 in XRoar, headless (`tests/coco/cocotest.py`, `tests/coco3/coco3test.py`) |
-| `make release` | Copy the programs (with the overlay builds' `.non` files), `oscii.fnt`, the Amiga's icon and `docs/QUICKSTART.md` to `release/` (after `make test`, `audit` and `size`): the last known good version |
+| `make release` | Copy the programs (with the overlay builds' `.non` files), `oscii.fnt`, the Amiga's icon and `docs/QUICKSTART.md` to `release/` (after `make test`, `audit` and `size`): the last known good version.  Commit it, then push a tag that matches the splash's version (`git tag v0.6.0 && git push origin v0.6.0`): `.github/workflows/release.yml` makes a GitHub release with `release/` as `p8vi-v0.6.0.zip` |
 | `make clean` | Remove everything in `build/`                             |
 
 # How the AI context works

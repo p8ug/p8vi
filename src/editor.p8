@@ -2703,7 +2703,7 @@ view {
 
     str[] splash_lines = [
         "Prog8 VI (p8vi)",
-        "v0.5 20261112",
+        "v0.6.0 20261123",
         "",
         "by Andrew Gillham",
         "and Claude Code",

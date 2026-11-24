@@ -76,6 +76,15 @@ platform {
             size -= 16
         }
         texttop = textstart + size
+        ; the spare memory starts where the biggest block ended, which the
+        ; text's block (from the top of the heap too) can pass by a few
+        ; bytes: z88dk's malloc doesn't end them at the same place.  (by 2 in
+        ; v0.6.0's test build: the yank buffer was the text's last 2 bytes)
+        if sparestart < texttop {
+            sparestart = texttop
+            if sparetop < sparestart
+                sparetop = sparestart
+        }
         main.SCREEN_WIDTH    = txt.width()
         main.SCREEN_HEIGHT   = txt.height()
         main.STATUS_HEIGHT   = 1    ; only 16 rows, so no spare row above the status line
