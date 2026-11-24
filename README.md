@@ -36,6 +36,7 @@ later.
 | `build/p8vi-c64reu.prg` | `src/p8vi_c64reu.p8` | C64 with the page store, for text in an REU |
 | `build/p8vi-c64disk.prg` | `src/p8vi.p8` | An experiment: C64 with the page store, its pages in SEQ files (`p8vi.swp...`) on the drive, for fast devices (IDE64, RAMLink, CMD HD); `src/diskpage` |
 | `build/p8vi-cx16.prg` | `src/p8vi_cx16.p8` | Commander X16, text in banked RAM (the page store) |
+| `build/p8vi-cx16ovl.prg`, `build/p8vi-cx16isoovl.prg` | `src/p8vi_cx16ovl.p8`, `src/p8vi_cx16isoovl.p8` | The X16 builds with overlays (p8c's `%overlay`): part of the code in banked RAM, for room in main RAM; the `.prg` is a small loader that reads the `.non` of the same name from drive 8, so both go on the disk |
 | `build/p8vi-cx16iso.prg` | `src/p8vi_cx16iso.p8` | Commander X16 in ISO mode: ASCII/ISO text shown as it is (`{ \| } ~ _`), file names in ISO; built from `%encoding iso` copies of the sources (`tools/encode_copy.py`, `bugs/encoding_option.md`), in progress |
 | `build/p8vi-mega65.prg` | `src/p8vi_mega65.p8` | MEGA65 (MEGA65 mode), with the ASCII characters for ASCII files, in progress |
 | `build/p8vi-mega65dma.prg` | `src/p8vi_mega65dma.p8` | The same with the page store: text in attic RAM (or chip RAM banks 4 and 5) through DMA, in progress |
@@ -51,6 +52,7 @@ later.
 | `build/p8vi-trs80m4x.cmd` | `src/p8vi_trs80m4x.p8` | TRS-80 Model 4 with 128 KB: the text in the second 64 KB (the page store) |
 | `build/p8vi-cpm.com` | `src/p8vi_cpm.p8` | CP/M 2.2 or later on a Z80, with an ANSI, VT52 or ADM-3A terminal (`-t`), in progress |
 | `build/p8vi-host` | `src/p8vi_host.p8` | This machine (macOS, Linux, Windows) in a terminal (llvm64): the wide core (32-bit positions, 16 MB of text), the screen the terminal window's size and following it (`make host`) |
+| `build/p8vi-coco.bin`, `build/p8vi-coco3.bin` | `src/p8vi_coco.p8`, `src/p8vi_coco3.p8` | Tandy Color Computer 2 (64 KB, all RAM) and 3 (80 columns), with Disk BASIC; `src/coco`, `src/coco3` |
 | `build/p8vi-amiga` | `src/p8vi_amiga.p8` | Amiga (amiga500: a 68000, Kickstart 1.3 or later) in its Shell window, or a window of its own from Workbench: the console is an ANSI terminal, the screen follows the window's size; the wide core (32-bit positions), text in the largest free block of memory; `src/amiga` (console, diskio), `make amiga`, `make emu-amiga`, in progress |
 
 The editor itself is `src/editor.p8` (with `charset.p8`,
@@ -114,14 +116,16 @@ are the same as on the C64 font build, and MEGA with `:`, `.`, `;` and
 - **git**, **make** and **Python 3**.
 - *Optional:* the [VICE emulator](https://vice-emu.sourceforge.io/) for
   `make emu` and the Commodore tests; x16emu, xmega65 (Xemu), trs80gp,
-  tnylpo and [Copperline](https://copperline.dev/) for the X16, MEGA65,
-  TRS-80, CP/M and Amiga versions' runs and tests.  `make test` uses the
-  compiler's built-in virtual target and needs no emulator.
+  tnylpo, XRoar (with toolshed's `decb`) and [Copperline](https://copperline.dev/)
+  for the X16, MEGA65, TRS-80, CP/M, Color Computer and Amiga versions'
+  runs and tests.  `make test` runs on prog8c-llvm's virtual machine and
+  needs no emulator.
 
-p8vi's `Makefile` runs `prog8c-llvm` (`PCC`): Prog8 with the llvm targets
-(llvm16 for the TRS-80 and CP/M, llvm64 for the host), which the
-Commodore, X16, MEGA65 and Amiga builds compile with too; `make
-PCC=prog8c` uses the upstream compiler for the targets it has.
+p8vi's `Makefile` compiles every version with `p8c` (`PCC`): p8p8, a Prog8
+compiler written in Prog8, which builds the Commodore, X16, MEGA65,
+TRS-80, CP/M, Color Computer, Amiga and host versions, and writes the
+virtual target's IR for prog8c-llvm's `-vm` (`VM`).  Each program is
+compiled straight into its name (`-o`).
 `setup.py` expects `prog8c` in your `PATH`.  If you
 downloaded the jar, a small wrapper script does the job.  On Linux or macOS
 save this as `prog8c` somewhere in your `PATH` and `chmod +x` it:
@@ -161,7 +165,8 @@ The useful `make` targets are:
 |--------------|-----------------------------------------------------------|
 | `make check` | Fast syntax check without compiling                       |
 | `make run`   | Compile for the virtual target and run it                 |
-| `make test` | The text store tests (the same as `make test-gap`) |
+| `make test` | The text store tests (the same as `make test-gap`): p8c writes their IR, prog8c-llvm's virtual machine runs it |
+| `make test-all` | Every build's test suites, one after the other (an hour or more) |
 | `make quick` | The quick tier for iterating: `make test`, `make size`, then one or two suites per build side by side (`tests/quick.py`, a few minutes; `make quick QUICK="c64 c128x"` for some builds) |
 | `make test-gap` | Text store tests (gap buffer and page store) on the virtual target |
 | `make test-c64` | Editor command tests on a C64 in VICE (`tests/vice/edtest.py`, ~10 s) |
@@ -192,7 +197,8 @@ The useful `make` targets are:
 | `make disk` | `build/testgap.d81`: a 1581 disk with the C64 and VIC-20 programs, `oscii.fnt` and the sample files, for `make emu-c64`, `emu-c64reu`, `emu-c64font` and `emu-vic20` (drive 8 is a 1581) |
 | `make c64`   | Compile for the C64 and run it in VICE                    |
 | `make cx16`  | Compile for the Commander X16 and run it in x16emu        |
-| `make release` | Copy the programs, `oscii.fnt` and `docs/QUICKSTART.md` to `release/` (after `make test`, `audit` and `size`): the last known good version |
+| `make test-coco`, `test-coco3` | The file suites on a Color Computer 2 and 3 in XRoar, headless (`tests/coco/cocotest.py`, `tests/coco3/coco3test.py`) |
+| `make release` | Copy the programs (with the overlay builds' `.non` files), `oscii.fnt`, the Amiga's icon and `docs/QUICKSTART.md` to `release/` (after `make test`, `audit` and `size`): the last known good version |
 | `make clean` | Remove everything in `build/`                             |
 
 # How the AI context works
@@ -221,7 +227,7 @@ and ask you to run `setup.py`.
 
 - **A different compiler:** to match a beta or a locally built compiler
   (such as `prog8c-beta`), change `PROG8C` at the top of `setup.py`
-  and `PCC` in the `Makefile`.  Snapshot builds are matched by commit, so
+  and `PCC` in the `Makefile` (`make PCC=...` for one run).  Snapshot builds are matched by commit, so
   for a compiler built from a fork or another branch also change
   `TARGET_REPO` and `TARGET_BRANCH`.
 - **Your program:** source goes in `src/`, starting with the toplevel files `src/p8vi.p8` and `src/p8vi_vic20.p8`.

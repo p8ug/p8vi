@@ -16,7 +16,8 @@
     tools/listsize.py LIST --map --min-free 128        # exit 1 if less room left
 
 memtop comes from the memtop check in the .asm file next to the listing
-(prog8 writes `.cerror * >= $8000` there), or from --memtop.
+(prog8c writes `.cerror * >= $8000` there, p8c `.cerror prog8_program_end
+>= $8000`), or from --memtop.
 
 Code sizes come from address differences, so they include padding and the
 data tables that follow a routine.  Local labels (loops, branches) stay with
@@ -223,7 +224,8 @@ def memtop_from_asm(list_path):
     try:
         with open(asm, encoding="utf-8", errors="replace") as f:
             for line in f:
-                m = re.search(r"\.cerror\s+\*\s*>=?\s*\$([0-9a-fA-F]+)", line)
+                # (prog8c: .cerror * >= $8000; p8c: .cerror prog8_program_end >= $8000)
+                m = re.search(r"\.cerror\s+(?:\*|prog8_program_end)\s*>=?\s*\$([0-9a-fA-F]+)", line)
                 if m:
                     return int(m.group(1), 16)
     except OSError:

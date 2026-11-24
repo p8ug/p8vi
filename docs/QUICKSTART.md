@@ -1,10 +1,10 @@
 # p8vi quick start
 
 p8vi is a vi for 8-bit computers: the Commodore C64, VIC-20, PET, Plus/4
-and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, and
-CP/M machines; and for the Amiga.  If you
+and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, the
+Tandy Color Computer 2 and 3, and CP/M machines; and for the Amiga.  If you
 know vi or vim you know most of it already; this guide shows what is there
-and which keys to press on a Commodore (or TRS-80) keyboard.  `docs/KEYS.md` lists every vi command with
+and which keys to press on a Commodore (or TRS-80, or Color Computer) keyboard.  `docs/KEYS.md` lists every vi command with
 whether it is done.
 
 ## Contents
@@ -38,6 +38,8 @@ whether it is done.
 | `p8vi-c128reu.prg` | C128 with an REU | up to 64 KB (or about 60 KB in RAM bank 1 without an REU) |
 | `p8vi-cx16.prg` | Commander X16 | up to 64 KB (in banked RAM) |
 | `p8vi-cx16iso.prg` | Commander X16, in ISO mode: ASCII files show as they are, `{ \| } ~ _` included, and file names keep their case | up to 64 KB (in banked RAM) |
+| `p8vi-cx16ovl.prg` and `p8vi-cx16ovl.non` | Commander X16, with every feature: part of the program waits in banked RAM (overlays), which leaves room in main RAM; both files go on the disk | up to 64 KB (in banked RAM) |
+| `p8vi-cx16isoovl.prg` and `p8vi-cx16isoovl.non` | the same in ISO mode | up to 64 KB (in banked RAM) |
 | `p8vi-vic20.prg` | VIC-20 with 32 KB of RAM expansion (blocks 1, 2, 3 and 5) | about 4.7 KB |
 | `p8vi-plus4.prg` | Plus/4 | about 24.6 KB |
 | `p8vi-pet32.prg` | PET 4032 (32 KB, BASIC 4, 40 columns) | about 3.3 KB |
@@ -47,10 +49,13 @@ whether it is done.
 | `p8vi-trs80m4.cmd` | TRS-80 Model 4 (64 KB, in its own mode, 80 columns) with TRSDOS 6 or LS-DOS 6.3 | about 15 KB |
 | `p8vi-trs80m4x.cmd` | TRS-80 Model 4 with 128 KB | up to about 60 KB (in the second 64 KB) |
 | `p8vi-cpm.com` | CP/M 2.2 or later on a Z80, with a terminal (ANSI, VT52 or ADM-3A) | the TPA's room after the program (about 20 KB on the C128's CP/M 3) |
+| `p8vi-coco.bin` | Tandy Color Computer 1 or 2 with 64 KB and Disk BASIC (32 x 16 screen) | about 27 KB (in the RAM where the ROMs were) |
+| `p8vi-coco3.bin` | Tandy Color Computer 3 with Disk BASIC (80 x 24 screen) | about 27 KB |
 | `p8vi-amiga` (and its icon, `p8vi-amiga.info`) | Amiga with Kickstart 1.3 or later (a 68000 is enough), in a Shell window or from Workbench | the largest free block of memory, less 32 KB: hundreds of KB, more than 64 KB too |
 
-The MEGA65, PET, Plus/4, C128, TRS-80, X16 ISO, CP/M and Amiga versions
-and `p8vi-c64disk` are new and still being worked on.
+The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M and Amiga
+versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
+still being worked on.
 
 Load and run it like any program, for example on a C64:
 
@@ -68,6 +73,19 @@ On the TRS-80, copy `p8vi-trs80.cmd` to an LDOS disk as `P8VI/CMD` (for
 example with a FreHD's `IMPORT2`) and type `P8VI` at the LDOS prompt.  On
 a Model 4 the same with `p8vi-trs80m4.cmd`, or `p8vi-trs80m4x.cmd` with
 128 KB, at the TRSDOS 6 or LS-DOS 6.3 prompt.
+
+On the X16, the overlay builds are two files: copy `p8vi-cx16ovl.prg`
+and `p8vi-cx16ovl.non` to the same disk (or SD card folder), keeping their
+names, then `LOAD"P8VI-CX16OVL.PRG",8,1` and `RUN`.  The `.prg` is a small
+loader that reads the `.non` from drive 8; without it, it stops with
+`?CANNOT LOAD THE PROGRAM'S FILE`.  The same for `p8vi-cx16isoovl`.
+
+On a Color Computer, copy `p8vi-coco.bin` (or `p8vi-coco3.bin` on a CoCo 3)
+to a Disk BASIC disk as `P8VI.BIN` (for example with toolshed's `decb copy
+-2 p8vi-coco.bin disk.dsk,P8VI.BIN`), then `LOADM"P8VI":EXEC`.  The CoCo 2
+version uses the 32 x 16 screen, which has no small letters: they show as
+capitals in inverse.  The CoCo 3 version switches to the 80 x 24 screen
+(`WIDTH 80`) and back to BASIC's width when it quits.
 
 On CP/M, copy `p8vi-cpm.com` as `P8VI.COM` and give the terminal:
 `p8vi -t adm3a` (the TRS-80 Model 4's Montezuma CP/M and many CP/M
@@ -151,6 +169,22 @@ drive 1 (and `p8vi.tmp` goes there too).  Without one the DOS finds the
 file on any drive, and `:e` adds the drive it was on to the name
 (`t.txt:1`), so `:w` saves it there again.  A new file without a drive
 number goes on the first drive the DOS can write to.
+
+**The Color Computer** has no `Esc`, `Ctrl` or Backspace key:
+
+| vi key | Type this | |
+|--------|-----------|---|
+| `Esc` | `BREAK` | |
+| `Ctrl-F` etc. | `@` then `F`, in nav mode | in insert mode and on the `:` line `@` is just typed |
+| Backspace | `←` | in nav mode it moves left, as `h` |
+| `←` in insert mode | `Shift` + `←` | |
+| `^` | `Shift` + `↑` | `↑` alone moves up |
+
+The other arrow keys move as on the other computers.  Files are named as
+Disk BASIC has them: `t.txt` is `T.TXT`.  A drive number goes after the
+name, as in the TRS-80's DOS: `:w t.txt:1` saves on drive 1 (and
+`p8vi.tmp` goes there too).  New files get CR line endings, as Disk
+BASIC's.
 
 **The Amiga's** keyboard has every key vi needs: `Esc`, `Ctrl`, and
 `Del` and `Backspace` both delete.  The cursor keys move in every mode,
@@ -468,7 +502,9 @@ read and written as they are, and `:set ascii` and `:set crlf` aren't
 there.  It is for the 4032 (40 columns) for now.
 
 The X16 version leaves out the start screen, marks, `&`, and `zt` `zz`
-`zb`, and the Plus/4 version nothing.
+`zb`, and the Plus/4 version nothing.  The X16's overlay builds
+(`p8vi-cx16ovl`, `p8vi-cx16isoovl`) have everything: the room their
+overlays leave in main RAM went to these.
 
 `:set number`, and `:d` and `:y` with line ranges, are not in the
 VIC-20, PET, X16, `p8vi-mega65dma`, `p8vi-c64font` and `p8vi-c128x`
@@ -492,6 +528,10 @@ petscii` (its files are ASCII).  The Model 4 version has marks and `zt`
 version leaves out, and the start screen, marks, `zt` `zz` `zb` and
 scrolling one row at a time (the screen is drawn again instead): its
 program has to leave room below $f400 for its page slots.
+
+The Color Computer versions leave out the disk commands (`:@`, `:@$`,
+`:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
+ASCII); they have everything else.
 
 The CP/M and Amiga versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
