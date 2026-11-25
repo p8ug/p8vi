@@ -137,7 +137,7 @@ call and its variables, and gets nothing for it.  In p8vi, `:r $` needs
 cost the VIC-20 18 bytes, and marking the helper `inline` didn't change
 that.  So `dir_cmd()` has its own copy, which a build without `DIR`
 leaves out.  Compare the size of a build with the feature off before and
-after (`tools/listsize.py old.list new.list`).
+after (`p8size old.p8map new.p8map`, from builds made with `p8c -map`).
 
 ### Assembly routines
 
@@ -178,7 +178,7 @@ Compare the sizes of two builds, one with the switch on and one with it off:
 make size                 # room left on each target
 ```
 
-`tools/listsize.py` can also compare two `.list` files and show which
+`p8size` can also compare two `.p8map` files and show which
 blocks and subroutines grew or shrank.  For p8vi on the VIC-20, turning
 the switches off frees:
 

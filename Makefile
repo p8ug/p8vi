@@ -43,7 +43,6 @@ AMIGATEST = tests/amiga/amigatest.py
 COCOTEST = tests/coco/cocotest.py
 COCO3TEST = tests/coco3/coco3test.py
 QUICKTEST = tests/quick.py
-LISTSIZE = tools/listsize.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
 MKICON = tools/mkicon.py
@@ -68,45 +67,45 @@ export Z88DK
 # the page store (src/c64reu before src/c64); the disk build, the page store
 # with its pages in SEQ files on the drive (src/diskpage); the font build,
 # the REU build with its own font (src/c64/font.p8)
-PCCARGSC64 = -srcdirs "src:src/c64" -asmlist -target c64
-PCCARGSC64REU = -srcdirs "src:src/c64reu:src/c64" -asmlist -target c64
-PCCARGSC64DISK = -srcdirs "src:src/diskpage:src/c64" -asmlist -target c64
+PCCARGSC64 = -srcdirs "src:src/c64" -map -asmlist -target c64
+PCCARGSC64REU = -srcdirs "src:src/c64reu:src/c64" -map -asmlist -target c64
+PCCARGSC64DISK = -srcdirs "src:src/diskpage:src/c64" -map -asmlist -target c64
 PCCARGSC64FONT = $(PCCARGSC64REU)
 # the X16: the page store in banked RAM.  the ISO mode build compiles every
 # module of the program with %encoding iso, from copies tools/encode_copy.py
 # makes in build/cx16iso (the library keeps PETSCII; bugs/encoding_option.md)
-PCCARGSCX16 = -srcdirs "src:src/cx16" -asmlist -target cx16
+PCCARGSCX16 = -srcdirs "src:src/cx16" -map -asmlist -target cx16
 CX16ISO = build/cx16iso
 CX16ISO_DIRS = src src/cx16
-PCCARGSCX16ISO = -srcdirs "$(CX16ISO)/src:$(CX16ISO)/cx16" -asmlist -target cx16
+PCCARGSCX16ISO = -srcdirs "$(CX16ISO)/src:$(CX16ISO)/cx16" -map -asmlist -target cx16
 # the MEGA65: the gap buffer, all features; the page store build, its pages
 # in attic RAM (or chip RAM banks 4 and 5) through DMA
-PCCARGSM65 = -srcdirs "src:src/mega65" -asmlist -target config/mega65.properties
-PCCARGSM65DMA = -srcdirs "src:src/mega65dma:src/mega65" -asmlist -target config/mega65.properties
+PCCARGSM65 = -srcdirs "src:src/mega65" -map -asmlist -target config/mega65.properties
+PCCARGSM65DMA = -srcdirs "src:src/mega65dma:src/mega65" -map -asmlist -target config/mega65.properties
 # the Plus/4: the full editor, running with the RAM in up to $fc00
-PCCARGSPLUS4 = -srcdirs "src:src/plus4" -asmlist -target config/plus4.properties
+PCCARGSPLUS4 = -srcdirs "src:src/plus4" -map -asmlist -target config/plus4.properties
 # the C128 in its own mode, on the VIC-II or the VDC; the bank 1 build (the
 # page store in RAM bank 1, a font build too); the REU build (an REU, or
 # bank 1; src/c64 for its reu.p8)
-PCCARGSC128 = -srcdirs "src:src/c128" -asmlist -target c128
-PCCARGSC128X = -srcdirs "src:src/c128bank1:src/c128font:src/c128" -asmlist -target c128
-PCCARGSC128REU = -srcdirs "src:src/c128reu:src/c128:src/c64" -asmlist -target c128
+PCCARGSC128 = -srcdirs "src:src/c128" -map -asmlist -target c128
+PCCARGSC128X = -srcdirs "src:src/c128bank1:src/c128font:src/c128" -map -asmlist -target c128
+PCCARGSC128REU = -srcdirs "src:src/c128reu:src/c128:src/c64" -map -asmlist -target c128
 # the PET (32 KB, BASIC 4) and the VIC-20 (with 24 KB or more)
-PCCARGSPET32 = -srcdirs "src:src/pet32" -asmlist -target pet32
-PCCARGSVIC20 = -srcdirs "src:src/vic20" -asmlist -target config/vic20plus24.properties
+PCCARGSPET32 = -srcdirs "src:src/pet32" -map -asmlist -target pet32
+PCCARGSVIC20 = -srcdirs "src:src/vic20" -map -asmlist -target config/vic20plus24.properties
 # the TRS-80 Model III with LDOS; the Model 4 in its own mode (TRSDOS 6,
 # LS-DOS 6.3); the Model 4 with 128 KB (the page store in the second 64 KB)
-PCCARGSTRS80 = -srcdirs "src:src/trs80" -target trs80
-PCCARGSTRS80M4 = -srcdirs "src:src/trs80m4:src/trs80" -target trs80m4
-PCCARGSTRS80M4X = -srcdirs "src:src/trs80m4x:src/trs80m4:src/trs80" -target trs80m4
+PCCARGSTRS80 = -srcdirs "src:src/trs80" -map -target trs80
+PCCARGSTRS80M4 = -srcdirs "src:src/trs80m4:src/trs80" -map -target trs80m4
+PCCARGSTRS80M4X = -srcdirs "src:src/trs80m4x:src/trs80m4:src/trs80" -map -target trs80m4
 # CP/M 2.2 and later on a Z80, with a terminal (-t ansi, vt52 or adm3a): the
 # cpm profile leaves z88dk's heap off, the link options turn it on (AMALLOC:
 # from the program's end up toward the stack)
-PCCARGSCPM = -srcdirs "src:src/cpm:src/trs80" -target cpm \
+PCCARGSCPM = -srcdirs "src:src/cpm:src/trs80" -map -target cpm \
 	-Xlink -pragma-define:CRT_HEAP_AMALLOC=1 -Xlink -pragma-define:CRT_HEAP_ENABLE=1
 # the Color Computer 2 (64 KB, in all-RAM mode) and 3 (80 columns)
-PCCARGSCOCO = -srcdirs "src:src/coco" -target coco2ram -varshigh 0
-PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -target coco3ram -varshigh 0
+PCCARGSCOCO = -srcdirs "src:src/coco" -map -target coco2ram -varshigh 0
+PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh 0
 # the wide core (32-bit text positions, up to pos.TEXT_MAX): compiled from
 # copies with uword made long (tools/encode_copy.py --wide), src/wide/postype.p8
 # first.  the host (llvm64: this machine, in a terminal); the Amiga (amiga500:
@@ -118,7 +117,7 @@ WIDE_DIRS = src src/trs80
 HOSTWIDE = build/hostwide
 PCCARGSHOST = -srcdirs "src/wide:$(HOSTWIDE)/src:src/host:src/cpm:$(HOSTWIDE)/trs80" -target llvm64
 AMIGAWIDE = build/amigawide
-PCCARGSAMIGA = -srcdirs "src/wide:$(AMIGAWIDE)/src:src/amiga:src/cpm:$(AMIGAWIDE)/trs80" -target amiga500
+PCCARGSAMIGA = -srcdirs "src/wide:$(AMIGAWIDE)/src:src/amiga:src/cpm:$(AMIGAWIDE)/trs80" -map -target amiga500
 # the virtual target (make test)
 PCCARGSVM = -srcdirs "src:src/virtual" -target virtual
 
@@ -677,31 +676,42 @@ test-coco3: build/p8vi-coco3test.bin
 	$(PYTHON) -B $(COCO3TEST) -j 4
 
 #
-# the 6502 builds: how much room is left, and the known miscompiles
+# how much room is left, and the known miscompiles
 #
 
-# the memory map of each build and the room left below memtop
-# (tools/listsize.py LIST for where the bytes go, A.list B.list to compare).
-# the overlay builds: p8c's -meminfo, main memory and each overlay (their
-# listing has the overlays at $a000)
+# the memory map of each build and the room left: p8size reads the map
+# that p8c's -map writes (build/name.p8map), which knows where the
+# program must end (p8size MAP for where the bytes go, A.p8map B.p8map
+# to compare two).  p8vi-c64font must end below its font at $c800.  The
+# Z80 and Amiga builds have no fixed end (the text gets the heap): sizes
+# only (the host build gets no map).  The overlay builds have no map: p8c's -meminfo, main
+# memory and each overlay
 VIC20_MIN_FREE = 64
+P8SIZE = p8size
 size: $(PROGS)
-	$(PYTHON) $(LISTSIZE) build/p8vi-c64.list --map
-	$(PYTHON) $(LISTSIZE) build/p8vi-c64reu.list --map
-	$(PYTHON) $(LISTSIZE) build/p8vi-c64disk.list --map
-	$(PYTHON) $(LISTSIZE) build/p8vi-c64font.list --map --memtop 0xc800
-	$(PYTHON) $(LISTSIZE) build/p8vi-cx16.list --map
-	$(PYTHON) $(LISTSIZE) build/p8vi-cx16iso.list --map
+	$(P8SIZE) --map build/p8vi-c64.p8map
+	$(P8SIZE) --map --memtop 0xc800 build/p8vi-c64font.p8map
+	$(P8SIZE) --map build/p8vi-c64reu.p8map
+	$(P8SIZE) --map build/p8vi-c64disk.p8map
+	$(P8SIZE) --map build/p8vi-cx16.p8map
+	$(P8SIZE) --map build/p8vi-cx16iso.p8map
 	$(PCC) $(PCCARGSCX16) -meminfo -o build/p8vi-cx16ovl.prg src/p8vi_cx16ovl.p8 | sed -n 1,3p
 	$(PCC) $(PCCARGSCX16ISO) -meminfo -o build/p8vi-cx16isoovl.prg $(CX16ISO)/src/p8vi_cx16isoovl.p8 | sed -n 1,3p
-	$(PYTHON) $(LISTSIZE) build/p8vi-mega65.list --map --memtop 0xc000
-	$(PYTHON) $(LISTSIZE) build/p8vi-mega65dma.list --map --memtop 0xc000
-	$(PYTHON) $(LISTSIZE) build/p8vi-pet32.list --map --memtop 0x8000
-	$(PYTHON) $(LISTSIZE) build/p8vi-c128.list --map --memtop 0xc000
-	$(PYTHON) $(LISTSIZE) build/p8vi-c128x.list --map --memtop 0xc000
-	$(PYTHON) $(LISTSIZE) build/p8vi-c128reu.list --map --memtop 0xc000
-	$(PYTHON) $(LISTSIZE) build/p8vi-plus4.list --map --memtop 0xfc00
-	$(PYTHON) $(LISTSIZE) build/p8vi-vic20.list --map --min-free $(VIC20_MIN_FREE)
+	$(P8SIZE) --map build/p8vi-mega65.p8map
+	$(P8SIZE) --map build/p8vi-mega65dma.p8map
+	$(P8SIZE) --map build/p8vi-pet32.p8map
+	$(P8SIZE) --map build/p8vi-c128.p8map
+	$(P8SIZE) --map build/p8vi-c128x.p8map
+	$(P8SIZE) --map build/p8vi-c128reu.p8map
+	$(P8SIZE) --map build/p8vi-plus4.p8map
+	$(P8SIZE) --map --min-free $(VIC20_MIN_FREE) build/p8vi-vic20.p8map
+	$(P8SIZE) --map build/p8vi-trs80.p8map
+	$(P8SIZE) --map build/p8vi-trs80m4.p8map
+	$(P8SIZE) --map build/p8vi-trs80m4x.p8map
+	$(P8SIZE) --map build/p8vi-cpm.p8map
+	$(P8SIZE) --map build/p8vi-coco.p8map
+	$(P8SIZE) --map build/p8vi-coco3.p8map
+	$(P8SIZE) --map build/p8vi-amiga.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)

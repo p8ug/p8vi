@@ -193,7 +193,7 @@ The useful `make` targets are:
 | `make emu-amiga` | Run the Amiga version in Copperline with `sample.txt` |
 | `make emu-amiga-wb` | Workbench 1.3 in Copperline (`AMIGA_WB_HDF`, by default FS-UAE's `workbench-135.hdf`) with `build/amiga` as the volume `p8vi:`: p8vi, its icon and a project icon for `sample.txt` |
 | `make test-mega65-keymap` | Measure which MEGA65 keys give which PETSCII codes (the harness's key table) |
-| `make size` | Memory map and room left below memtop for each build (`tools/listsize.py`) |
+| `make size` | Memory map and room left for each build: `p8size` reads the `.p8map` that `p8c -map` writes beside each program (`p8size build/p8vi-c64.p8map` also shows where the bytes go, by block and subroutine; two maps compare them). The overlay builds use `p8c -meminfo` |
 | `make disk` | `build/testgap.d81`: a 1581 disk with the C64 and VIC-20 programs, `oscii.fnt` and the sample files, for `make emu-c64`, `emu-c64reu`, `emu-c64font` and `emu-vic20` (drive 8 is a 1581) |
 | `make c64`   | Compile for the C64 and run it in VICE                    |
 | `make cx16`  | Compile for the Commander X16 and run it in x16emu        |
