@@ -33,7 +33,7 @@ platform {
        textstart = sys.progend()
        ; in MEGA65 mode $c000-$ffff is ROM and I/O (the CPU reads the ROM,
        ; writes go to the RAM under it), so the text memory ends at $c000
-       ; (memtop in config/mega65.properties).  (the C64 test of $01 doesn't
+       ; (memtop in p8c's mega65 target).  (the C64 test of $01 doesn't
        ; work here: it reads $00, and the C64's $cfe0 put the top of the text
        ; and the yank and undo buffers in the ROM)
        texttop = $c000

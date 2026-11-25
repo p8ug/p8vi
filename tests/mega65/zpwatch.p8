@@ -1,7 +1,7 @@
 ; zpwatch: which zero page bytes does the MEGA65 ROM change in KERNAL calls?
 ; (make test-mega65-zp: runs it in xmega65 headless and shows the result)
 ;
-; Prog8's zp_* lists in config/mega65.properties were copied from the C64,
+; Prog8's zp_* lists for the MEGA65 (now p8c's mega65 target) were copied from the C64,
 ; but the MEGA65 ROM uses zero page differently and its use is private
 ; (it can change between ROM versions).  For each operation below this
 ; fills the candidate addresses with $55, copies page 0, runs the

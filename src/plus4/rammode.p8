@@ -22,7 +22,7 @@
 ; RAM under the ROM with interrupts off ($cfad in the KERNAL).
 ;
 ; The low code goes in the cassette buffer, $0353-$03f2 (Prog8's R0-R15 are
-; at $0333-$0352, config/plus4.properties).  start() must run before any
+; at $0333-$0352 in p8c's plus4 target).  start() must run before any
 ; code above $8000 runs, and main.start begins with Prog8's own start-up
 ; (clearing the variables: prog8_lib, at the end of the program).  So the
 ; library's p8_sys_startup.init_system_phase2, the last thing before

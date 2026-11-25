@@ -80,10 +80,10 @@ CX16ISO_DIRS = src src/cx16
 PCCARGSCX16ISO = -srcdirs "$(CX16ISO)/src:$(CX16ISO)/cx16" -map -asmlist -target cx16
 # the MEGA65: the gap buffer, all features; the page store build, its pages
 # in attic RAM (or chip RAM banks 4 and 5) through DMA
-PCCARGSM65 = -srcdirs "src:src/mega65" -map -asmlist -target config/mega65.properties
-PCCARGSM65DMA = -srcdirs "src:src/mega65dma:src/mega65" -map -asmlist -target config/mega65.properties
+PCCARGSM65 = -srcdirs "src:src/mega65" -map -asmlist -target mega65
+PCCARGSM65DMA = -srcdirs "src:src/mega65dma:src/mega65" -map -asmlist -target mega65
 # the Plus/4: the full editor, running with the RAM in up to $fc00
-PCCARGSPLUS4 = -srcdirs "src:src/plus4" -map -asmlist -target config/plus4.properties
+PCCARGSPLUS4 = -srcdirs "src:src/plus4" -map -asmlist -target plus4
 # the C128 in its own mode, on the VIC-II or the VDC; the bank 1 build (the
 # page store in RAM bank 1, a font build too); the REU build (an REU, or
 # bank 1; src/c64 for its reu.p8)
@@ -92,7 +92,7 @@ PCCARGSC128X = -srcdirs "src:src/c128bank1:src/c128font:src/c128" -map -asmlist 
 PCCARGSC128REU = -srcdirs "src:src/c128reu:src/c128:src/c64" -map -asmlist -target c128
 # the PET (32 KB, BASIC 4) and the VIC-20 (with 24 KB or more)
 PCCARGSPET32 = -srcdirs "src:src/pet32" -map -asmlist -target pet32
-PCCARGSVIC20 = -srcdirs "src:src/vic20" -map -asmlist -target config/vic20plus24.properties
+PCCARGSVIC20 = -srcdirs "src:src/vic20" -map -asmlist -target vic20plus24
 # the TRS-80 Model III with LDOS; the Model 4 in its own mode (TRSDOS 6,
 # LS-DOS 6.3); the Model 4 with 128 KB (the page store in the second 64 KB)
 PCCARGSTRS80 = -srcdirs "src:src/trs80" -map -target trs80
@@ -176,15 +176,15 @@ build/p8vi-cx16iso.prg: src/p8vi_cx16iso.p8 $(SRCS) $(ENCODE_COPY)
 build/p8vi-cx16isoovl.prg: src/p8vi_cx16isoovl.p8 $(SRCS) $(ENCODE_COPY)
 	$(PYTHON) $(ENCODE_COPY) --encoding iso $(CX16ISO) $(CX16ISO_DIRS)
 	$(PCC) $(PCCARGSCX16ISO) -o $@ $(CX16ISO)/src/p8vi_cx16isoovl.p8
-build/p8vi-mega65.prg: src/p8vi_mega65.p8 $(SRCS) config/mega65.properties $(wildcard libraries/mega65/*.p8)
+build/p8vi-mega65.prg: src/p8vi_mega65.p8 $(SRCS)
 	$(PCC) $(PCCARGSM65) -o $@ $<
-build/p8vi-mega65dma.prg: src/p8vi_mega65dma.p8 $(SRCS) config/mega65.properties $(wildcard libraries/mega65/*.p8)
+build/p8vi-mega65dma.prg: src/p8vi_mega65dma.p8 $(SRCS)
 	$(PCC) $(PCCARGSM65DMA) -o $@ $<
-build/p8vi-plus4.prg: src/p8vi_plus4.p8 $(SRCS) config/plus4.properties $(wildcard libraries/plus4/*.p8)
+build/p8vi-plus4.prg: src/p8vi_plus4.p8 $(SRCS)
 	$(PCC) $(PCCARGSPLUS4) -o $@ $<
 build/p8vi-pet32.prg: src/p8vi_pet32.p8 $(SRCS)
 	$(PCC) $(PCCARGSPET32) -o $@ $<
-build/p8vi-vic20.prg: src/p8vi_vic20.p8 $(SRCS) config/vic20plus24.properties
+build/p8vi-vic20.prg: src/p8vi_vic20.p8 $(SRCS)
 	$(PCC) $(PCCARGSVIC20) -o $@ $<
 build/p8vi-trs80.cmd: src/p8vi_trs80.p8 $(SRCS)
 	$(PCC) $(PCCARGSTRS80) -o $@ $<
@@ -627,11 +627,11 @@ test-mega65dma: build/p8vi-mega65dma.prg
 	$(PYTHON) -B $(M65TEST) --prg $< screen
 
 # which zero page bytes the MEGA65 ROM changes in KERNAL calls (for the
-# zp_* lists in config/mega65.properties), in xmega65 headless.  the
+# zp_* lists of p8c's mega65 target), in xmega65 headless.  the
 # program is also on the disk as zpload, for its LOAD test.
 ZPDISK = build/zpwatch.d81
 test-mega65-zp: build
-	$(PCC) -srcdirs "tests/mega65" -target config/mega65.properties -o build/zpwatch.prg tests/mega65/zpwatch.p8
+	$(PCC) -srcdirs "tests/mega65" -target mega65 -o build/zpwatch.prg tests/mega65/zpwatch.p8
 	c1541 -format zpwatch,01 d81 $(ZPDISK)
 	c1541 -attach $(ZPDISK) -write build/zpwatch.prg zpload,p
 	xmega65 -headless -sleepless -besure -prg build/zpwatch.prg -prgexit \
@@ -639,7 +639,7 @@ test-mega65-zp: build
 	cat build/zpwatch.txt
 # which MEGA65 keys give which PETSCII codes (the table in tools/m65harness.py)
 test-mega65-keymap: build
-	$(PCC) -srcdirs "tests/mega65" -target config/mega65.properties -o build/keyecho.prg tests/mega65/keyecho.p8
+	$(PCC) -srcdirs "tests/mega65" -target mega65 -o build/keyecho.prg tests/mega65/keyecho.p8
 	$(PYTHON) -B $(M65KEYMAP) --prg build/keyecho.prg
 
 # the TRS-80s in trs80gp, a window per suite (tests/trs80/trstest.py; the
