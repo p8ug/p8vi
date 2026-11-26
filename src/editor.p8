@@ -79,6 +79,9 @@ main {
     const ubyte ENDING_CR = 0
     const ubyte ENDING_LF = 1
     const ubyte ENDING_CRLF = 2
+    ; (the Atari: platform ATASCII_EOL, $9b) ATASCII's line end, kept as it
+    ; is in memory (buffer.eol), as LF is
+    const ubyte ENDING_ATASCII = 3
 
     ubyte mode
     ubyte key
@@ -2182,7 +2185,7 @@ main {
     ; :set ascii / petscii / cr / lf / crlf - how the file is written;
     ; :set shows it.  (features.NUMBER) :set number / nu, nonumber / nonu:
     ; the line numbers in front of the lines
-    str[] set_options = ["petscii", "ascii", "cr", "lf", "crlf"]
+    str[] set_options = ["petscii", "ascii", "cr", "lf", "crlf", "atascii"]
     str[] number_options = ["number", "nu", "nonumber", "nonu"]
 
     sub set_cmd(str arg) {
@@ -2199,7 +2202,8 @@ main {
         if arg[0] != 0 {
             ; (ascii and crlf only in a build with those features)
             while strings.compare(arg, set_options[i]) != 0 or
-                    (i == 1 and not features.ASCII) or (i == 4 and not features.CRLF) {
+                    (i == 1 and not features.ASCII) or (i == 4 and not features.CRLF) or
+                    (i == 5 and ATASCII_EOL == 0) {
                 i++
                 if i == len(set_options) {
                     status("bad option")
@@ -2242,11 +2246,16 @@ main {
     ; character changes, which undo can't undo.
     sub set_line_ending(ubyte ending) {
         ubyte eol = if ending == ENDING_LF $0a else $0d
+        if ATASCII_EOL != 0 and ending == ENDING_ATASCII
+            eol = ATASCII_EOL
         if ending != line_ending
             buffer.modified = true
         line_ending = ending
         if eol != buffer.eol {
-            void translate_text(charset.SWAP_EOL)
+            if ATASCII_EOL != 0 and (eol == ATASCII_EOL or buffer.eol == ATASCII_EOL)
+                replace_eol(buffer.eol, eol)
+            else
+                void translate_text(charset.SWAP_EOL)
             buffer.eol = eol
             buffer.undo_clear()
             cur_line = buffer.line_number(cursor())
@@ -2362,8 +2371,12 @@ main {
             }
             if features.ASCII and ascii
                 charset.translate(p, m, charset.TO_PETSCII)
-            if insert and not empty and eol != buffer.eol
-                charset.translate(p, m, charset.SWAP_EOL)
+            if insert and not empty and eol != buffer.eol {
+                if ATASCII_EOL != 0 and (eol == ATASCII_EOL or buffer.eol == ATASCII_EOL)
+                    replace_bytes(p, m, eol, buffer.eol)
+                else
+                    charset.translate(p, m, charset.SWAP_EOL)
+            }
             buffer.read_done(m)
             position += m
             if not buffer.PAGED or n < room or room == 0
@@ -2407,6 +2420,8 @@ main {
             line_ending = ENDING_CR
             if eol == $0a
                 line_ending = ENDING_LF
+            if ATASCII_EOL != 0 and eol == ATASCII_EOL
+                line_ending = ENDING_ATASCII
             if crlf
                 line_ending = ENDING_CRLF
         }
@@ -2418,10 +2433,13 @@ main {
     }
 
     ; the line end character of count bytes at p: LF when there are LFs
-    ; but no CRs (files from other systems), otherwise CR
+    ; but no CRs (files from other systems), otherwise CR; (the Atari)
+    ; ATASCII_EOL when one comes first
     sub file_eol(pointer p, uword count) -> ubyte {
         ubyte eol = $0d
         while count != 0 {
+            if ATASCII_EOL != 0 and @(p) == ATASCII_EOL
+                return ATASCII_EOL
             if @(p) == $0d
                 return $0d
             if @(p) == $0a
@@ -2477,6 +2495,8 @@ main {
         ; (a new text's line end: LF where new files get LF, the host's and
         ; the Amiga's; else CR, CP/M's CR LF too, CR in memory)
         buffer.eol = $0d
+        if ATASCII_EOL != 0 and NEW_ENDING == ENDING_ATASCII
+            buffer.eol = ATASCII_EOL
         if NEW_ENDING == ENDING_LF
             buffer.eol = $0a
         final_eol = features.FINAL_EOL
@@ -2525,6 +2545,27 @@ main {
                 charset.translate(p, n, how)
         }
         return true
+    }
+
+    ; (ATASCII_EOL) the line end old to new in the whole text, or (bytes)
+    ; in count bytes at p: CR and LF swap with charset's SWAP_EOL, $9b
+    ; doesn't
+    sub replace_eol(ubyte old, ubyte new) {
+        pointer p
+        uword n
+        ubyte i
+        for i in 0 to buffer.chunks() - 1 {
+            p, n = buffer.chunk(i)
+            replace_bytes(p, n, old, new)
+        }
+    }
+    sub replace_bytes(pointer p, uword count, ubyte old, ubyte new) {
+        while count != 0 {
+            if @(p) == old
+                @(p) = new
+            p++
+            count--
+        }
     }
 
     ubyte[1] lf_byte = [$0a]

@@ -44,6 +44,7 @@ COCOTEST = tests/coco/cocotest.py
 COCO3TEST = tests/coco3/coco3test.py
 DOSTEST = tests/dos/dostest.py
 A2TEST = tests/appleii/a2test.py
+ATARITEST = tests/atari/atest.py
 QUICKTEST = tests/quick.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
@@ -117,6 +118,11 @@ PCCARGSAPPLEII = -srcdirs "src:src/appleii:src/trs80" -map -target appleii -addr
 PCCARGSPRODOS = -srcdirs "src:src/prodos:src/appleii:src/trs80" -map -target prodos -varsaddress '$$0800'
 # the same with 128 KB: the text in pages in the aux memory (the page store)
 PCCARGSPRODOSX = -srcdirs "src:src/prodosx:src/prodos:src/appleii:src/trs80" -map -target prodos -varsaddress '$$0800'
+# the Atari 8-bit computers (48 KB or more, without BASIC): an executable
+# for $2000; its text files are ATASCII, lines ending with $9b
+PCCARGSATARI = -srcdirs "src:src/atari:src/trs80" -map -target atari
+# the same for the 130XE: the text in pages in its extra 64 KB (the page store)
+PCCARGSATARIXE = -srcdirs "src:src/atarixe:src/atari:src/trs80" -map -target atari
 # the Color Computer 2 (64 KB, in all-RAM mode) and 3 (80 columns)
 PCCARGSCOCO = -srcdirs "src:src/coco" -map -target coco2ram -varshigh 0
 PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh 0
@@ -145,13 +151,13 @@ PROGS = build/p8vi-c64.prg build/p8vi-c64reu.prg build/p8vi-c64disk.prg build/p8
 	build/p8vi-cx16.prg build/p8vi-cx16iso.prg build/p8vi-cx16ovl.prg build/p8vi-cx16isoovl.prg \
 	build/p8vi-mega65.prg build/p8vi-mega65dma.prg build/p8vi-plus4.prg build/p8vi-pet32.prg build/p8vi-vic20.prg \
 	build/p8vi-trs80.cmd build/p8vi-trs80m4.cmd build/p8vi-trs80m4x.cmd build/p8vi-cpm.com \
-	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
+	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys build/p8vi-atari.xex build/p8vi-atarixe.xex
 # the host's (not in the release: built for this machine)
 HOSTPROG = build/p8vi-host
 ALLPROGS = $(PROGS) $(HOSTPROG)
 # the test builds: they play the keys in a file first (features.KEYFILE)
 TESTPROGS = build/p8vi-cpmtest.com build/p8vi-trs80test.cmd build/p8vi-trs80m4test.cmd build/p8vi-trs80m4xtest.cmd \
-	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys
+	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys build/p8vi-ataritest.xex build/p8vi-atarixetest.xex
 # what the release has besides the programs
 EXTRAS = build/oscii.fnt build/p8vi-amiga.info
 
@@ -232,6 +238,14 @@ build/p8vi-prodosx.sys: src/p8vi_prodosx.p8 $(SRCS)
 	$(PCC) $(PCCARGSPRODOSX) -o $@ $<
 build/p8vi-prodosxtest.sys: src/p8vi_prodosxtest.p8 $(SRCS)
 	$(PCC) $(PCCARGSPRODOSX) -o $@ $<
+build/p8vi-atari.xex: src/p8vi_atari.p8 $(SRCS)
+	$(PCC) $(PCCARGSATARI) -o $@ $<
+build/p8vi-ataritest.xex: src/p8vi_ataritest.p8 $(SRCS)
+	$(PCC) $(PCCARGSATARI) -o $@ $<
+build/p8vi-atarixe.xex: src/p8vi_atarixe.p8 $(SRCS)
+	$(PCC) $(PCCARGSATARIXE) -o $@ $<
+build/p8vi-atarixetest.xex: src/p8vi_atarixetest.p8 $(SRCS)
+	$(PCC) $(PCCARGSATARIXE) -o $@ $<
 build/p8vi-coco.bin: src/p8vi_coco.p8 $(SRCS)
 	$(PCC) $(PCCARGSCOCO) -o $@ $<
 build/p8vi-cocotest.bin: src/p8vi_cocotest.p8 $(SRCS)
@@ -268,6 +282,7 @@ trs80m4x: build/p8vi-trs80m4x.cmd
 cpm: build/p8vi-cpm.com
 dos: build/p8vi-dos.exe
 appleii: build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
+atari: build/p8vi-atari.xex build/p8vi-atarixe.xex
 coco: build/p8vi-coco.bin build/p8vi-coco3.bin
 host: build/p8vi-host
 amiga: build/p8vi-amiga build/p8vi-amiga.info
@@ -442,6 +457,16 @@ emu-prodos: build/p8vi-prodos.sys
 	AC_JAR="$(AC_JAR)" $(PYTHON) -B $(A2DISK) --prodos $(PRODOS_DISK) build/prodos.dsk $< \
 		samples/sample6.txt samples/sample.txt samples/sampsmall.txt
 	bobbin --disk build/prodos.dsk
+# the Atari 800XL (without BASIC) in atari800, with build/atari and the
+# samples as its disk: the host device is D: (-Hdevicename D), so
+# :e sample.txt is D1:SAMPLE.TXT there (8.3 names: sampsmall.txt is
+# sampsmal.txt too)
+ATARIDIR = build/atari
+emu-atari: build/p8vi-atari.xex
+	$(MD) $(ATARIDIR)
+	$(CP) samples/*.txt $(ATARIDIR)
+	$(CP) samples/sampsmall.txt $(ATARIDIR)/sampsmal.txt
+	atari800 -xl -nobasic -hreadwrite -Hdevicename D -H1 $(ATARIDIR) -run $<
 # the TRS-80 Model 4 with Montezuma Micro CP/M 2.2 in trs80gp: drive A a
 # copy of the system disk (CPM_DISK), drive B a new data disk with p8vi.com
 # and samples (tools/cpm/m4disk.py; made again each time, so edits there
@@ -494,7 +519,7 @@ emu-amiga-keyecho: build
 # everything: the virtual target's, every build's suites (an hour or more)
 TESTS = test test-host test-cpm test-c64 test-c64-screen test-c64reu test-c64disk test-c64font \
 	test-c128 test-c128x test-c128reu test-pet32 test-plus4 test-mega65 test-mega65dma \
-	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii
+	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii test-atari
 test-all: $(TESTS)
 
 # the quick tier, for iterating: the virtual tests, the size checks, then one
@@ -543,6 +568,17 @@ test-dos: build/p8vi-dostest.exe build/p8vi-dos.exe
 	$(PYTHON) -B $(DOSTEST) files
 	$(PYTHON) -B $(DOSTEST) screen
 	$(PYTHON) -B $(DOSTEST) number
+
+# the Atari 800XL in atari800, without a window (skipped without it): the
+# file suites, the screen suites against a full redraw, and with :set
+# number (tests/atari/atest.py, seconds; the files on its host device);
+# then the 130XE build's on a 130XE (--xe: the page store suites too)
+test-atari: build/p8vi-ataritest.xex build/p8vi-atari.xex build/p8vi-atarixetest.xex build/p8vi-atarixe.xex
+	$(PYTHON) -B $(ATARITEST) files
+	$(PYTHON) -B $(ATARITEST) screen
+	$(PYTHON) -B $(ATARITEST) number
+	$(PYTHON) -B $(ATARITEST) --xe files
+	$(PYTHON) -B $(ATARITEST) --xe screen
 
 # the Apple II in bobbin (tests/appleii/a2test.py): with DOS 3.3 (skipped
 # without bobbin, dos33 or the disk, A2_DISK) the file suites and the
@@ -799,13 +835,15 @@ size: $(PROGS)
 	$(P8SIZE) --map --memtop 0x9600 build/p8vi-appleii.p8map
 	$(P8SIZE) --map build/p8vi-prodos.p8map
 	$(P8SIZE) --map build/p8vi-prodosx.p8map
+	$(P8SIZE) --map build/p8vi-atari.p8map
+	$(P8SIZE) --map build/p8vi-atarixe.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)
 audit: $(PROGS)
 	$(PYTHON) $(ASMAUDIT) build/p8vi-c64.asm build/p8vi-c64reu.asm build/p8vi-c64font.asm build/p8vi-cx16.asm build/p8vi-vic20.asm
 
-.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
+.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii atari coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
 
 #
 # end-of-file

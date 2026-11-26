@@ -467,6 +467,45 @@ and editing then go about as with an REU.
     huge or bigundo: more than 44 pages), screen, number: all pass.  Not
     yet: :rec after a reset (bobbin's reset is in its debugger, not in
     --simple), and /RAM's next format may overwrite the headers.
+- **Atari 8-bit** (`p8vi-atari.xex`, `make atari`; p8c's atari target;
+  src/atari with src/trs80's charset and store, the 6502 fastmem).  For
+  $2000; every feature: 29.3 KB of code, 1.3 KB of variables, 9.2 KB of
+  text up to MEMTOP; the key buffers below the program (MEMLO to $2000).
+  The 40 x 24 screen (SAVMSC) written as screen codes, the cursor in
+  inverse (the OS's off, CRSINH), the : line through E:.  Keys: the
+  arrows $1c-$1f, RETURN $9b, BACK SPACE $7e and CTRL DELETE $fe as DEL,
+  BREAK (BRKKEY) as RUN/STOP.  The clock for blinking is RTCLOK.
+  - ATASCII text: lines end with $9b.  The editor has that as a fourth
+    line ending, ENDING_ATASCII, kept as it is in memory (buffer.eol), and
+    `:set atascii`; a platform's ATASCII_EOL is $9b here, 0 elsewhere
+    (14 bytes in the other builds: the option's name).  New files get it.
+  - ATASCII has no ~: the empty rows show '-'.
+  - Tests (`make test-atari`, tests/atari/atest.py): files, screen,
+    number, all pass, about a second each: atari800 -turbo with SDL's
+    dummy drivers (no window), the host device as D: (-Hdevicename D -H1
+    dir -hreadwrite), started in its monitor with a breakpoint at
+    sys.exit, then quit.  So no DOS: the CIO calls are the same, but not
+    tried under a real DOS 2.5 yet (MEMLO, its rename).  The DOS25.XFD at
+    hand confuses atr (dos2fs) already, so a disk made with it doesn't
+    boot right; with -run, atari800 loads the program without booting the
+    disk, so D: has no DOS then.
+- **Atari 130XE** (`p8vi-atarixe.xex`; src/atarixe: store_platform (the
+  page store), pagemem_platform, xebank).  The extra 64 KB is four banks
+  of 16 KB at $4000-$7fff (PORTB bits 2-3, bit 4 0 for the CPU, bit 5 left
+  1 for ANTIC): two headers and 62 pages of 1 KB.  p8vi's code runs
+  through the window, so the copy loop (40 bytes) is copied to page 6
+  ($0680, after the virtual registers) and runs from there: bank in, copy
+  between the window and the slots (above $8000 or below $2000), PORTB
+  back, return.  The banks are found by reading bank 0 through the window:
+  on a 64 KB XL that is the program's own code (no test writes: they'd
+  land on it); without them it says it needs a 130XE.
+  - Room: the page store's code is 36.3 KB with SPLASH, SCROLL, NUMBER,
+    MARKS and Z_VIEW off (about 2.3 KB, the user's choice of what to drop),
+    1.7 KB of variables, 1.9 KB left for the slot and the scratch buffer.
+  - Tests (atest.py --xe, on atari800's -xe): files with the page store
+    suites (not huge, bigundo: more than 62 pages; not marks, zview) and
+    screen pass.  Not yet: :rec after a reset; DOS 2.5's RAMDISK.COM uses
+    the same banks (D8:), not checked for.
 - **Host version** (`build/p8vi-host`, `make host`; llvm64 and clang;
   src/host with src/cpm's screen and src/trs80's charset).  A program for
   this machine in a terminal: `p8vi-host [-t ansi|vt52|adm3a] [-40]

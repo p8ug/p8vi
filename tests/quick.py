@@ -80,6 +80,9 @@ def jobs():
         'prodos': [PY + ['tests/appleii/a2test.py', '--prodos', '--work', '{work}', 'files', 'delete-put', 'subst', 'marks'],
                    PY + ['tests/appleii/a2test.py', '--prodos', '--work', '{work}', 'number', 'scroll-down']],
         'prodosx': [PY + ['tests/appleii/a2test.py', '--prodosx', '--work', '{work}', 'files', 'pages', 'delete-put']],
+        'atari': [PY + ['tests/atari/atest.py', '--work', '{work}', 'files', 'delete-put', 'crlf', 'final-eol'],
+                  PY + ['tests/atari/atest.py', '--work', '{work}', 'number', 'scroll-down']],
+        'atarixe': [PY + ['tests/atari/atest.py', '--xe', '--work', '{work}', 'files', 'pages', 'delete-put']],
         'amiga': [PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'files', 'delete-put', 'undo', 'zview'],
                   PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'screen', 'long-page', 'scroll-mixed']],
     }

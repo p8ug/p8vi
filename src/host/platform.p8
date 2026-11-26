@@ -266,6 +266,8 @@ main {
     const bool CTRL_Z_SAVE = false
     ; a new text's line ending: LF
     const ubyte NEW_ENDING = ENDING_LF
+    ; (the Atari: ATASCII text files end their lines with $9b, ENDING_ATASCII)
+    const ubyte ATASCII_EOL = 0
 
     ; special characters
 

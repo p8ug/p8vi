@@ -164,6 +164,8 @@ main {
     ; a new text's line ending (editor.p8's ENDING_*): CR, as DOS 3.3's T
     ; files have
     const ubyte NEW_ENDING = 0
+    ; (the Atari: ATASCII text files end their lines with $9b, ENDING_ATASCII)
+    const ubyte ATASCII_EOL = 0
 
     ; special characters
 

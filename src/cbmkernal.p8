@@ -25,6 +25,8 @@ main {
     const bool CTRL_Z_SAVE = false
     ; a new text's line ending (editor.p8's ENDING_*): CR
     const ubyte NEW_ENDING = 0
+    ; (the Atari: ATASCII text files end their lines with $9b, ENDING_ATASCII)
+    const ubyte ATASCII_EOL = 0
     const bool DRIVE_SUFFIX = false
     ; (features.PREFIX) what ends a drive or path prefix
     const ubyte PATH_SEP = ':'
