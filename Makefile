@@ -43,11 +43,13 @@ AMIGATEST = tests/amiga/amigatest.py
 COCOTEST = tests/coco/cocotest.py
 COCO3TEST = tests/coco3/coco3test.py
 DOSTEST = tests/dos/dostest.py
+A2TEST = tests/appleii/a2test.py
 QUICKTEST = tests/quick.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
 MKICON = tools/mkicon.py
 M4DISK = tools/cpm/m4disk.py
+A2DISK = tools/a2disk.py
 ENCODE_COPY = tools/encode_copy.py
 FILEOP = tools/fileop.py
 
@@ -107,6 +109,14 @@ PCCARGSCPM = -srcdirs "src:src/cpm:src/trs80" -map -target cpm \
 # MS-DOS on an 8086 or better: an .exe whose code has a segment of its own,
 # the variables, stack and text another
 PCCARGSDOS = -srcdirs "src:src/dos:src/trs80" -map -target dosexe
+# the Apple II with DOS 3.3: a binary file for $0800 (BRUN), which DOS
+# leaves $0800-$95ff (the smaller set of features: src/p8vi_appleii.p8)
+PCCARGSAPPLEII = -srcdirs "src:src/appleii:src/trs80" -map -target appleii -address '$$0800'
+# the Apple II with ProDOS: a system program for $2000 (P8VI.SYSTEM), its
+# variables at $0800-$1fff, the text from its end to $bf00: every feature
+PCCARGSPRODOS = -srcdirs "src:src/prodos:src/appleii:src/trs80" -map -target prodos -varsaddress '$$0800'
+# the same with 128 KB: the text in pages in the aux memory (the page store)
+PCCARGSPRODOSX = -srcdirs "src:src/prodosx:src/prodos:src/appleii:src/trs80" -map -target prodos -varsaddress '$$0800'
 # the Color Computer 2 (64 KB, in all-RAM mode) and 3 (80 columns)
 PCCARGSCOCO = -srcdirs "src:src/coco" -map -target coco2ram -varshigh 0
 PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh 0
@@ -135,13 +145,13 @@ PROGS = build/p8vi-c64.prg build/p8vi-c64reu.prg build/p8vi-c64disk.prg build/p8
 	build/p8vi-cx16.prg build/p8vi-cx16iso.prg build/p8vi-cx16ovl.prg build/p8vi-cx16isoovl.prg \
 	build/p8vi-mega65.prg build/p8vi-mega65dma.prg build/p8vi-plus4.prg build/p8vi-pet32.prg build/p8vi-vic20.prg \
 	build/p8vi-trs80.cmd build/p8vi-trs80m4.cmd build/p8vi-trs80m4x.cmd build/p8vi-cpm.com \
-	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe
+	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
 # the host's (not in the release: built for this machine)
 HOSTPROG = build/p8vi-host
 ALLPROGS = $(PROGS) $(HOSTPROG)
 # the test builds: they play the keys in a file first (features.KEYFILE)
 TESTPROGS = build/p8vi-cpmtest.com build/p8vi-trs80test.cmd build/p8vi-trs80m4test.cmd build/p8vi-trs80m4xtest.cmd \
-	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe
+	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys
 # what the release has besides the programs
 EXTRAS = build/oscii.fnt build/p8vi-amiga.info
 
@@ -210,6 +220,18 @@ build/p8vi-dos.exe: src/p8vi_dos.p8 $(SRCS)
 	$(PCC) $(PCCARGSDOS) -o $@ $<
 build/p8vi-dostest.exe: src/p8vi_dostest.p8 $(SRCS)
 	$(PCC) $(PCCARGSDOS) -o $@ $<
+build/p8vi-appleii.bin: src/p8vi_appleii.p8 $(SRCS)
+	$(PCC) $(PCCARGSAPPLEII) -o $@ $<
+build/p8vi-appleiitest.bin: src/p8vi_appleiitest.p8 $(SRCS)
+	$(PCC) $(PCCARGSAPPLEII) -o $@ $<
+build/p8vi-prodos.sys: src/p8vi_prodos.p8 $(SRCS)
+	$(PCC) $(PCCARGSPRODOS) -o $@ $<
+build/p8vi-prodostest.sys: src/p8vi_prodostest.p8 $(SRCS)
+	$(PCC) $(PCCARGSPRODOS) -o $@ $<
+build/p8vi-prodosx.sys: src/p8vi_prodosx.p8 $(SRCS)
+	$(PCC) $(PCCARGSPRODOSX) -o $@ $<
+build/p8vi-prodosxtest.sys: src/p8vi_prodosxtest.p8 $(SRCS)
+	$(PCC) $(PCCARGSPRODOSX) -o $@ $<
 build/p8vi-coco.bin: src/p8vi_coco.p8 $(SRCS)
 	$(PCC) $(PCCARGSCOCO) -o $@ $<
 build/p8vi-cocotest.bin: src/p8vi_cocotest.p8 $(SRCS)
@@ -245,6 +267,7 @@ trs80m4: build/p8vi-trs80m4.cmd
 trs80m4x: build/p8vi-trs80m4x.cmd
 cpm: build/p8vi-cpm.com
 dos: build/p8vi-dos.exe
+appleii: build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
 coco: build/p8vi-coco.bin build/p8vi-coco3.bin
 host: build/p8vi-host
 amiga: build/p8vi-amiga build/p8vi-amiga.info
@@ -402,6 +425,23 @@ emu-dos: build/p8vi-dos.exe
 	$(CP) samples/sampsmall.txt $(DOSDIR)/sampsmal.txt
 	$(CP) $< $(DOSDIR)/p8vi.exe
 	dosbox-x -fastlaunch -c "mount c $(DOSDIR)" -c "c:" -c "p8vi"
+# the Apple II (an enhanced //e) in bobbin, in this terminal: a copy of a
+# DOS 3.3 disk (A2_DISK, e.g. the system master) with P8VI and two samples
+# as T files (tools/a2disk.py; sample6.txt fits, sample.txt is cut).  At
+# the ] prompt: BRUN P8VI.  bobbin's Ctrl-C twice is its menu (q quits).
+A2_DISK ?= build/dos33.dsk
+emu-appleii: build/p8vi-appleii.bin
+	$(PYTHON) -B $(A2DISK) $(A2_DISK) build/appleii.dsk $< samples/sample6.txt samples/sample.txt
+	bobbin --disk build/appleii.dsk
+# the same with ProDOS: a copy of PRODOS_DISK (bobbin's ProDOS 2.4.2 disk,
+# which starts BASIC.SYSTEM) with P8VI.SYSTEM and three samples as TXT
+# files (with AppleCommander's ac, AC_JAR).  At the ] prompt: -P8VI.SYSTEM
+PRODOS_DISK ?= $(HOME)/.local/share/bobbin/images/prodos242.dsk
+AC_JAR ?= $(lastword $(sort $(wildcard $(HOME)/Downloads/AppleCommander-ac-*.jar)))
+emu-prodos: build/p8vi-prodos.sys
+	AC_JAR="$(AC_JAR)" $(PYTHON) -B $(A2DISK) --prodos $(PRODOS_DISK) build/prodos.dsk $< \
+		samples/sample6.txt samples/sample.txt samples/sampsmall.txt
+	bobbin --disk build/prodos.dsk
 # the TRS-80 Model 4 with Montezuma Micro CP/M 2.2 in trs80gp: drive A a
 # copy of the system disk (CPM_DISK), drive B a new data disk with p8vi.com
 # and samples (tools/cpm/m4disk.py; made again each time, so edits there
@@ -454,7 +494,7 @@ emu-amiga-keyecho: build
 # everything: the virtual target's, every build's suites (an hour or more)
 TESTS = test test-host test-cpm test-c64 test-c64-screen test-c64reu test-c64disk test-c64font \
 	test-c128 test-c128x test-c128reu test-pet32 test-plus4 test-mega65 test-mega65dma \
-	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos
+	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii
 test-all: $(TESTS)
 
 # the quick tier, for iterating: the virtual tests, the size checks, then one
@@ -503,6 +543,23 @@ test-dos: build/p8vi-dostest.exe build/p8vi-dos.exe
 	$(PYTHON) -B $(DOSTEST) files
 	$(PYTHON) -B $(DOSTEST) screen
 	$(PYTHON) -B $(DOSTEST) number
+
+# the Apple II in bobbin (tests/appleii/a2test.py): with DOS 3.3 (skipped
+# without bobbin, dos33 or the disk, A2_DISK) the file suites and the
+# screen suites against a full redraw, about a minute each; with ProDOS
+# (skipped without java, AppleCommander's jar AC_JAR or PRODOS_DISK) the
+# same and the :set number ones, seconds each, and the 128 KB build's
+# (--prodosx: edtest's page store suites too, but huge and bigundo)
+test-appleii: build/p8vi-appleiitest.bin build/p8vi-appleii.bin build/p8vi-prodostest.sys build/p8vi-prodos.sys \
+		build/p8vi-prodosxtest.sys build/p8vi-prodosx.sys
+	$(PYTHON) -B $(A2TEST) --disk $(A2_DISK) files
+	$(PYTHON) -B $(A2TEST) --disk $(A2_DISK) screen
+	$(PYTHON) -B $(A2TEST) --prodos --disk $(PRODOS_DISK) --ac "$(AC_JAR)" files
+	$(PYTHON) -B $(A2TEST) --prodos --disk $(PRODOS_DISK) --ac "$(AC_JAR)" screen
+	$(PYTHON) -B $(A2TEST) --prodos --disk $(PRODOS_DISK) --ac "$(AC_JAR)" number
+	$(PYTHON) -B $(A2TEST) --prodosx --disk $(PRODOS_DISK) --ac "$(AC_JAR)" files
+	$(PYTHON) -B $(A2TEST) --prodosx --disk $(PRODOS_DISK) --ac "$(AC_JAR)" screen
+	$(PYTHON) -B $(A2TEST) --prodosx --disk $(PRODOS_DISK) --ac "$(AC_JAR)" number
 
 # the C64 in VICE (x64sc and c1541 in the PATH): the file suites; the screen
 # suites (partial redraws must leave the same screen as a full redraw)
@@ -739,13 +796,16 @@ size: $(PROGS)
 	$(P8SIZE) --map build/p8vi-coco3.p8map
 	$(P8SIZE) --map build/p8vi-amiga.p8map
 	$(P8SIZE) --map --memtop 0xfc00 build/p8vi-dos.p8map
+	$(P8SIZE) --map --memtop 0x9600 build/p8vi-appleii.p8map
+	$(P8SIZE) --map build/p8vi-prodos.p8map
+	$(P8SIZE) --map build/p8vi-prodosx.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)
 audit: $(PROGS)
 	$(PYTHON) $(ASMAUDIT) build/p8vi-c64.asm build/p8vi-c64reu.asm build/p8vi-c64font.asm build/p8vi-cx16.asm build/p8vi-vic20.asm
 
-.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
+.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
 
 #
 # end-of-file

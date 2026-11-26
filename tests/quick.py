@@ -75,6 +75,11 @@ def jobs():
         'coco3': [PY + ['tests/coco3/coco3test.py', '--work', '{work}', 'delete-put', 'undo']],
         'dos': [PY + ['tests/dos/dostest.py', '--work', '{work}', 'files', 'delete-put', 'undo'],
                 PY + ['tests/dos/dostest.py', '--work', '{work}', 'screen', 'scroll-down']],
+        'appleii': [PY + ['tests/appleii/a2test.py', '--work', '{work}', 'files', 'delete-put', 'undo'],
+                    PY + ['tests/appleii/a2test.py', '--work', '{work}', 'screen', 'scroll-down']],
+        'prodos': [PY + ['tests/appleii/a2test.py', '--prodos', '--work', '{work}', 'files', 'delete-put', 'subst', 'marks'],
+                   PY + ['tests/appleii/a2test.py', '--prodos', '--work', '{work}', 'number', 'scroll-down']],
+        'prodosx': [PY + ['tests/appleii/a2test.py', '--prodosx', '--work', '{work}', 'files', 'pages', 'delete-put']],
         'amiga': [PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'files', 'delete-put', 'undo', 'zview'],
                   PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'screen', 'long-page', 'scroll-mixed']],
     }

@@ -406,6 +406,67 @@ and editing then go about as with an REU.
     ($f000, where the program and its variables must end).
   - Ideas: a 40-column mode, the screen's height from the BIOS (43/50
     rows on EGA/VGA), more of the 640 KB (far text).
+- **Apple II** (`p8vi-appleii.bin`, `make appleii`; p8c's appleii target,
+  DOS 3.3; src/appleii with src/trs80's charset, fastmem and store).  A
+  binary file for $0800 (`-address`), BRUN from DOS.  DOS 3.3 leaves a
+  program $0800-$95ff: the full editor (31.6 KB of code and 2.9 KB of
+  variables) leaves 1.8 KB, too little for the editor's buffers, so the
+  build has the VIC-20's features (plus FINAL_EOL and Z_VIEW): 5.5 KB.
+  40 x 24, the rows straight into the screen's memory, the cursor in
+  inverse; the files are T files (diskio.TEXT).  The right arrow is
+  Ctrl-U (21), so Ctrl-U is lost; the left arrow (8) and DELETE are DEL.
+  - Tests (`make test-appleii`, tests/appleii/a2test.py): edtest's file
+    and screen suites in bobbin (--simple --turbo), on a copy of A2_DISK
+    (the system master, as it is); dos33 puts P8VI,
+    KEYS and T.TXT on it and gets the files back.  bobbin quirks: the
+    first line typed during the boot can get lost (PRINT 1+1 first); with
+    --turbo the boot takes over a minute of emulated time and a save
+    about 30 s (--max-runtime 3000); it ends at --trap-success on sys.exit (from the
+    .p8map), and writes the disk image back only when the drive's motor
+    stops (the test build waits 2 s in platform.stop).  Not `big` (its
+    :r makes 6 KB), nor subst, marks.
+  - Fixed in p8c (2026-11-26): diskio left the rest of a file's track
+    allocated at every write, and after a program that printed the
+    return to BASIC lost DOS's stack pointer
+    (bugs/p8c_appleii_close_w_leaks_sectors.md).  Checked in bobbin: 8
+    writes leave the free sectors less the file's 2; :q! then PRINT and
+    CATALOG at the prompt work.
+- **ProDOS** (`p8vi-prodos.sys`, `make appleii`; p8c's prodos target, a
+  system program for $2000; src/prodos/a2dos_platform.p8 with
+  src/appleii's platform: a2dos has what differs, the text top, the file
+  types, the path separator).  Every feature, PREFIX with '/': 29.9 KB of
+  code at $2000, the variables (3.8 KB, ProDOS's two 1 KB file buffers
+  among them) at $0800 (-varsaddress; an assembler check that they end
+  below $2000), and 10.8 KB from the code's end to $bf00.
+  - Tests (`make test-appleii`, a2test.py --prodos): files, screen and
+    number, all pass, seconds each (ProDOS boots fast): a copy of bobbin's
+    prodos242.dsk (BASIC.SYSTEM), the files put on and read back with
+    AppleCommander's ac jar (`-p`, `-g`; a missing file is "No match." with
+    status 0), `-P8VI.SYSTEM` typed at the prompt.  No sector leak here.
+  - The plain ProDOS build's spare memory is $0800-$1fff after the
+    variables (a2dos.spare_start): the key buffers go there, not off the
+    text.
+  - Maybe: 80 columns on a IIe (aux/main interleaved screen), the language
+    card's 16 KB on DOS 3.3.
+- **ProDOS 128 KB** (`p8vi-prodosx.sys`; src/prodosx: store_platform
+  (the page store), pagemem_platform, auxmem).  The pages in aux
+  $0800-$bfff through the firmware's AUXMOVE ($c311): two headers, 44
+  pages of 1 KB; MACHID ($bf98) says 128 KB, else it says it needs 128 KB
+  and ends (main RAM has less than a page after it).  ProDOS's /RAM, in
+  the same memory, is disconnected (tech note 8: out of DEVLST, NODEV in
+  its vector); the next boot puts it back.  The page store uses fastmem
+  whatever FAST says, so the Apple builds now have src/fastmem.p8 (6502),
+  not the TRS-80's stubs (src/appleii/fastmem_platform.p8).
+  - Room: 39.3 KB of code ($2000-$b9b5), 4.3 KB of variables at $0800:
+    one slot (in the spare memory below $2000), the scratch buffer after
+    the code.  More slots would need room: fewer features, or the slots'
+    page size smaller.
+  - The sync's clock (platform.ticks) is the count of idle keyboard polls
+    / 16: the Apple has none.
+  - Tests (a2test.py --prodosx): files (with the page store suites, not
+    huge or bigundo: more than 44 pages), screen, number: all pass.  Not
+    yet: :rec after a reset (bobbin's reset is in its debugger, not in
+    --simple), and /RAM's next format may overwrite the headers.
 - **Host version** (`build/p8vi-host`, `make host`; llvm64 and clang;
   src/host with src/cpm's screen and src/trs80's charset).  A program for
   this machine in a terminal: `p8vi-host [-t ansi|vt52|adm3a] [-40]

@@ -52,6 +52,9 @@ later.
 | `build/p8vi-trs80m4x.cmd` | `src/p8vi_trs80m4x.p8` | TRS-80 Model 4 with 128 KB: the text in the second 64 KB (the page store) |
 | `build/p8vi-cpm.com` | `src/p8vi_cpm.p8` | CP/M 2.2 or later on a Z80, with an ANSI, VT52 or ADM-3A terminal (`-t`), in progress |
 | `build/p8vi-dos.exe` | `src/p8vi_dos.p8` | MS-DOS 2.0 or later on an 8086 or better (dosexe: the code in a 64 KB segment of its own, the variables and about 55 KB of text in another), 80 x 25 colour or monochrome text screen, `p8vi [file]`; `src/dos`, `make dos`, `make emu-dos` (DOSBox-X), in progress |
+| `build/p8vi-appleii.bin` | `src/p8vi_appleii.p8` | Apple IIe, IIc or IIgs with DOS 3.3 (a binary file for `$0800`, `BRUN P8VI`): the 40 x 24 screen, T files, the VIC-20's smaller set of features and about 5 KB of text, as DOS 3.3 leaves a program `$0800-$95ff`; `src/appleii`, `make appleii`, `make emu-appleii` (bobbin), in progress |
+| `build/p8vi-prodos.sys` | `src/p8vi_prodos.p8` | Apple IIe, IIc or IIgs with ProDOS: a system program (`P8VI.SYSTEM`, type SYS) with every feature and about 10 KB of text (its variables at `$0800-$1fff`, the text up to `$bf00`), paths (`/VOLUME/DIR/NAME`); `src/prodos` with `src/appleii`, `make emu-prodos` (bobbin, AppleCommander's `ac` jar: `AC_JAR`), in progress |
+| `build/p8vi-prodosx.sys` | `src/p8vi_prodosx.p8` | The same for 128 KB (a IIe with an extended 80-column card, a IIc or a IIgs): the text in the auxiliary 64 KB (the page store, 44 pages of 1 KB, through the firmware's AUXMOVE; ProDOS's /RAM is disconnected), up to about 44 KB, and `:rec` after a reset; `src/prodosx`, in progress |
 | `build/p8vi-host` | `src/p8vi_host.p8` | This machine (macOS, Linux, Windows) in a terminal (llvm64): the wide core (32-bit positions, 16 MB of text), the screen the terminal window's size and following it (`make host`) |
 | `build/p8vi-coco.bin`, `build/p8vi-coco3.bin` | `src/p8vi_coco.p8`, `src/p8vi_coco3.p8` | Tandy Color Computer 2 (64 KB, all RAM) and 3 (80 columns), with Disk BASIC; `src/coco`, `src/coco3` |
 | `build/p8vi-amiga` | `src/p8vi_amiga.p8` | Amiga (amiga500: a 68000, Kickstart 1.3 or later) in its Shell window, or a window of its own from Workbench: the console is an ANSI terminal, the screen follows the window's size; the wide core (32-bit positions), text in the largest free block of memory; `src/amiga` (console, diskio), `make amiga`, `make emu-amiga`, in progress |
@@ -118,14 +121,16 @@ are the same as on the C64 font build, and MEGA with `:`, `.`, `;` and
 - *Optional:* the [VICE emulator](https://vice-emu.sourceforge.io/) for
   `make emu` and the Commodore tests; x16emu, xmega65 (Xemu), trs80gp,
   tnylpo, XRoar (with toolshed's `decb`), [Copperline](https://copperline.dev/)
-  and [DOSBox-X](https://dosbox-x.com/)
-  for the X16, MEGA65, TRS-80, CP/M, Color Computer, Amiga and MS-DOS versions'
+  [DOSBox-X](https://dosbox-x.com/), and bobbin (Micah Cowan's Apple II emulator)
+  with dos33fsprogs' `dos33` and a DOS 3.3 disk image (`A2_DISK`), and
+  for ProDOS java with AppleCommander's `ac` jar (`AC_JAR`)
+  for the X16, MEGA65, TRS-80, CP/M, Color Computer, Amiga, MS-DOS and Apple II versions'
   runs and tests.  `make test` runs on prog8c-llvm's virtual machine and
   needs no emulator.
 
 p8vi's `Makefile` compiles every version with `p8c` (`PCC`): p8p8, a Prog8
 compiler written in Prog8, which builds the Commodore, X16, MEGA65,
-TRS-80, CP/M, Color Computer, Amiga, MS-DOS and host versions, and writes the
+TRS-80, CP/M, Color Computer, Amiga, MS-DOS, Apple II and host versions, and writes the
 virtual target's IR for prog8c-llvm's `-vm` (`VM`).  Each program is
 compiled straight into its name (`-o`).
 `setup.py` expects `prog8c` in your `PATH`.  If you
@@ -191,6 +196,7 @@ The useful `make` targets are:
 | `make test-trs80`, `test-trs80m4`, `test-trs80m4x` | The file suites on a TRS-80 in trs80gp (`tests/trs80/trstest.py`), and recovery (`tests/trs80/rectest.py`) on the Model 4 with 128 KB |
 | `make test-cpm` | The file, screen, `:set number` and line range suites in tnylpo on its three terminals (`tests/cpm/cpmtest.py`), and on a TRS-80 Model 4's Montezuma CP/M in trs80gp (`tests/cpm/m4test.py`) |
 | `make test-dos` | The file, screen and `:set number` suites on MS-DOS in DOSBox-X without a window (`tests/dos/dostest.py`, seconds): the screen after the keys against a full redraw, from the video RAM the test build writes to a file; `DOSMACHINE=hercules` (or `cga`, ...) picks DOSBox-X's machine |
+| `make test-appleii` | The file and screen suites on an enhanced //e with DOS 3.3 in bobbin (`tests/appleii/a2test.py`, about a minute each): a copy of `A2_DISK` (by default `build/dos33.dsk`, e.g. the system master) with P8VI, the keys and the text put on with `dos33`; then with ProDOS (`--prodos`, seconds each), the `:set number` suites too, and the 128 KB build's (`--prodosx`, with the page store suites), on a copy of `PRODOS_DISK` (bobbin's ProDOS 2.4.2 disk) with AppleCommander (`AC_JAR`); each skipped without its tools or disk |
 | `make test-host` | The same suites for the host version with the keys piped in, a 4.5 MB file, and the window resized in a pty (`cpmtest.py --host`) |
 | `make test-amiga` | `tests/vice/edtest.py`'s file and screen suites and the `:set number` ones on an A500 in Copperline, Kickstart 1.3 or AROS (`tests/amiga/amigatest.py`: the screen from p8vi's output redirected to a file, `p8vi >out.log`; ~1 min), and with 1.3 the window resized while p8vi runs |
 | `make emu-amiga` | Run the Amiga version in Copperline with `sample.txt` |
