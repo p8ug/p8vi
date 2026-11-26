@@ -242,6 +242,8 @@ main {
 
     ; CP/M text files end at the first ^Z
     const bool CTRL_Z_EOF = true
+    ; and a ^Z ends a saved file (its last 128-byte record is padding)
+    const bool CTRL_Z_SAVE = true
     ; a new text's line ending: CR LF, as CP/M's text files have
     const ubyte NEW_ENDING = ENDING_CRLF
 

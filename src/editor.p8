@@ -2625,7 +2625,7 @@ main {
         if features.FINAL_EOL and ok and final_eol
             ok = write_text(&buffer.eol, 1)
         ; (CP/M) a ^Z after the text: the file is whole 128-byte records
-        if CTRL_Z_EOF and ok
+        if CTRL_Z_SAVE and ok
             ok = diskio.f_write(&ctrl_z, 1)
         diskio.f_close_w()
         if features.ASCII and ascii_file and not buffer.WRITE_BACK

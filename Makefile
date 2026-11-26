@@ -42,6 +42,7 @@ REUTEST = tests/reu/reutest.py
 AMIGATEST = tests/amiga/amigatest.py
 COCOTEST = tests/coco/cocotest.py
 COCO3TEST = tests/coco3/coco3test.py
+DOSTEST = tests/dos/dostest.py
 QUICKTEST = tests/quick.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
@@ -103,6 +104,9 @@ PCCARGSTRS80M4X = -srcdirs "src:src/trs80m4x:src/trs80m4:src/trs80" -map -target
 # from the program's end up toward the stack)
 PCCARGSCPM = -srcdirs "src:src/cpm:src/trs80" -map -target cpm \
 	-Xlink -pragma-define:CRT_HEAP_AMALLOC=1 -Xlink -pragma-define:CRT_HEAP_ENABLE=1
+# MS-DOS on an 8086 or better: an .exe whose code has a segment of its own,
+# the variables, stack and text another
+PCCARGSDOS = -srcdirs "src:src/dos:src/trs80" -map -target dosexe
 # the Color Computer 2 (64 KB, in all-RAM mode) and 3 (80 columns)
 PCCARGSCOCO = -srcdirs "src:src/coco" -map -target coco2ram -varshigh 0
 PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh 0
@@ -131,13 +135,13 @@ PROGS = build/p8vi-c64.prg build/p8vi-c64reu.prg build/p8vi-c64disk.prg build/p8
 	build/p8vi-cx16.prg build/p8vi-cx16iso.prg build/p8vi-cx16ovl.prg build/p8vi-cx16isoovl.prg \
 	build/p8vi-mega65.prg build/p8vi-mega65dma.prg build/p8vi-plus4.prg build/p8vi-pet32.prg build/p8vi-vic20.prg \
 	build/p8vi-trs80.cmd build/p8vi-trs80m4.cmd build/p8vi-trs80m4x.cmd build/p8vi-cpm.com \
-	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga
+	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe
 # the host's (not in the release: built for this machine)
 HOSTPROG = build/p8vi-host
 ALLPROGS = $(PROGS) $(HOSTPROG)
 # the test builds: they play the keys in a file first (features.KEYFILE)
 TESTPROGS = build/p8vi-cpmtest.com build/p8vi-trs80test.cmd build/p8vi-trs80m4test.cmd build/p8vi-trs80m4xtest.cmd \
-	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin
+	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe
 # what the release has besides the programs
 EXTRAS = build/oscii.fnt build/p8vi-amiga.info
 
@@ -202,6 +206,10 @@ build/p8vi-cpm.com: src/p8vi_cpm.p8 $(SRCS)
 	$(PCC) $(PCCARGSCPM) -o $@ $<
 build/p8vi-cpmtest.com: src/p8vi_cpmtest.p8 $(SRCS)
 	$(PCC) $(PCCARGSCPM) -o $@ $<
+build/p8vi-dos.exe: src/p8vi_dos.p8 $(SRCS)
+	$(PCC) $(PCCARGSDOS) -o $@ $<
+build/p8vi-dostest.exe: src/p8vi_dostest.p8 $(SRCS)
+	$(PCC) $(PCCARGSDOS) -o $@ $<
 build/p8vi-coco.bin: src/p8vi_coco.p8 $(SRCS)
 	$(PCC) $(PCCARGSCOCO) -o $@ $<
 build/p8vi-cocotest.bin: src/p8vi_cocotest.p8 $(SRCS)
@@ -236,6 +244,7 @@ trs80: build/p8vi-trs80.cmd
 trs80m4: build/p8vi-trs80m4.cmd
 trs80m4x: build/p8vi-trs80m4x.cmd
 cpm: build/p8vi-cpm.com
+dos: build/p8vi-dos.exe
 coco: build/p8vi-coco.bin build/p8vi-coco3.bin
 host: build/p8vi-host
 amiga: build/p8vi-amiga build/p8vi-amiga.info
@@ -384,6 +393,15 @@ emu-cpm: build/p8vi-cpm.com
 	$(CP) samples/sampsmall.txt $(CPMDIR)/sampsmal.txt
 	$(CP) $< $(CPMDIR)/p8vi.com
 	cd $(CPMDIR) && tnylpo -s -w p8vi -t vt52
+# MS-DOS in DOSBox-X, in build/dos with the samples (drive C: is the
+# directory; DOS sees 8.3 names, so sampsmall.txt is sampsmal.txt too)
+DOSDIR = build/dos
+emu-dos: build/p8vi-dos.exe
+	$(MD) $(DOSDIR)
+	$(CP) samples/*.txt $(DOSDIR)
+	$(CP) samples/sampsmall.txt $(DOSDIR)/sampsmal.txt
+	$(CP) $< $(DOSDIR)/p8vi.exe
+	dosbox-x -fastlaunch -c "mount c $(DOSDIR)" -c "c:" -c "p8vi"
 # the TRS-80 Model 4 with Montezuma Micro CP/M 2.2 in trs80gp: drive A a
 # copy of the system disk (CPM_DISK), drive B a new data disk with p8vi.com
 # and samples (tools/cpm/m4disk.py; made again each time, so edits there
@@ -436,7 +454,7 @@ emu-amiga-keyecho: build
 # everything: the virtual target's, every build's suites (an hour or more)
 TESTS = test test-host test-cpm test-c64 test-c64-screen test-c64reu test-c64disk test-c64font \
 	test-c128 test-c128x test-c128reu test-pet32 test-plus4 test-mega65 test-mega65dma \
-	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3
+	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos
 test-all: $(TESTS)
 
 # the quick tier, for iterating: the virtual tests, the size checks, then one
@@ -477,6 +495,14 @@ test-cpm: build/p8vi-cpmtest.com build/p8vi-cpm.com
 	$(PYTHON) -B $(CPMTEST) lines
 	$(PYTHON) -B $(CPMTEST) endings
 	$(PYTHON) -B $(M4TEST)
+
+# MS-DOS in DOSBox-X, without a window (skipped without it): the file
+# suites, the screen suites against a full redraw, and with :set number
+# (tests/dos/dostest.py)
+test-dos: build/p8vi-dostest.exe build/p8vi-dos.exe
+	$(PYTHON) -B $(DOSTEST) files
+	$(PYTHON) -B $(DOSTEST) screen
+	$(PYTHON) -B $(DOSTEST) number
 
 # the C64 in VICE (x64sc and c1541 in the PATH): the file suites; the screen
 # suites (partial redraws must leave the same screen as a full redraw)
@@ -712,13 +738,14 @@ size: $(PROGS)
 	$(P8SIZE) --map build/p8vi-coco.p8map
 	$(P8SIZE) --map build/p8vi-coco3.p8map
 	$(P8SIZE) --map build/p8vi-amiga.p8map
+	$(P8SIZE) --map --memtop 0xfc00 build/p8vi-dos.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)
 audit: $(PROGS)
 	$(PYTHON) $(ASMAUDIT) build/p8vi-c64.asm build/p8vi-c64reu.asm build/p8vi-c64font.asm build/p8vi-cx16.asm build/p8vi-vic20.asm
 
-.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
+.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
 
 #
 # end-of-file

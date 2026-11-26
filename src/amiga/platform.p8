@@ -364,6 +364,8 @@ main {
 
     ; (CP/M's text files end at the first ^Z; not here)
     const bool CTRL_Z_EOF = false
+    ; (CP/M: a ^Z after a saved text)
+    const bool CTRL_Z_SAVE = false
     ; a new text's line ending: LF
     const ubyte NEW_ENDING = ENDING_LF
 

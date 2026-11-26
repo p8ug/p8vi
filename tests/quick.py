@@ -73,6 +73,8 @@ def jobs():
         'trs80m4x': [PY + ['tests/trs80/trstest.py', '--model', '4x', '--work', '{work}', 'pages']],
         'coco': [PY + ['tests/coco/cocotest.py', '--work', '{work}', 'delete-put', 'undo']],
         'coco3': [PY + ['tests/coco3/coco3test.py', '--work', '{work}', 'delete-put', 'undo']],
+        'dos': [PY + ['tests/dos/dostest.py', '--work', '{work}', 'files', 'delete-put', 'undo'],
+                PY + ['tests/dos/dostest.py', '--work', '{work}', 'screen', 'scroll-down']],
         'amiga': [PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'files', 'delete-put', 'undo', 'zview'],
                   PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'screen', 'long-page', 'scroll-mixed']],
     }

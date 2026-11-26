@@ -382,6 +382,30 @@ and editing then go about as with an REU.
   - The z80-cpm profile doesn't turn on z88dk's heap (the Makefile's link
     options do) and its txt has no getchr and plots 0-based to ANSI (one
     row and column off): worth a note to the compiler side.
+- **MS-DOS** (`p8vi-dos.exe`, `make dos`; p8c's dosexe target; src/dos
+  with src/trs80's charset, fastmem and store).  An .exe with split code
+  and data: the code (about 23 KB) has a segment of its own, so the text
+  gets the data segment less the variables and 1 KB of stack, about 55 KB
+  (the same build as a .COM, `-target dos`, has about 32 KB).  The rows
+  and scrolling go into the video RAM directly ($b800, or $b000 on a
+  monochrome adapter), the status line and cursor through the BIOS.
+  - Tests (`make test-dos`, tests/dos/dostest.py): edtest's file suites,
+    its screen suites against a Ctrl-L redraw and with :set number, in
+    DOSBox-X -silent (no window; about 2 s each).  The test build writes
+    the video RAM's characters to SCREENn.BIN at a $ff key.
+  - DOSBox-X's MDA and Hercules machines report BIOS mode 3, not 7: the
+    equipment word (int $11) tells monochrome.  There the BIOS's own
+    output (the status line) doesn't show in the dump; real hardware
+    has mode 7.  Not tried on real hardware yet.
+  - A text ends at its first ^Z (CTRL_Z_EOF), but none is written after
+    it (CTRL_Z_SAVE: only CP/M's records need one).
+  - `p8vi [file]`: the file is typed as `:e name` at the start (as the
+    host version does); anything more prints a usage line.
+  - `make size`: p8size on p8c's `.p8map`, with `--memtop 0xfc00`: the
+    text goes up to the stack less 1 KB, past the target's memory_end
+    ($f000, where the program and its variables must end).
+  - Ideas: a 40-column mode, the screen's height from the BIOS (43/50
+    rows on EGA/VGA), more of the 640 KB (far text).
 - **Host version** (`build/p8vi-host`, `make host`; llvm64 and clang;
   src/host with src/cpm's screen and src/trs80's charset).  A program for
   this machine in a terminal: `p8vi-host [-t ansi|vt52|adm3a] [-40]

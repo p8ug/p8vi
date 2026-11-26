@@ -165,6 +165,8 @@ main {
     ; save_file puts its temporary file on the same drive)
     ; (CP/M: text files end at the first ^Z)
     const bool CTRL_Z_EOF = false
+    ; (CP/M: a ^Z after a saved text)
+    const bool CTRL_Z_SAVE = false
     ; a new text's line ending (editor.p8's ENDING_*): CR
     const ubyte NEW_ENDING = 0
     const bool DRIVE_SUFFIX = true

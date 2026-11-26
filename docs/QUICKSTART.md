@@ -2,7 +2,8 @@
 
 p8vi is a vi for 8-bit computers: the Commodore C64, VIC-20, PET, Plus/4
 and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, the
-Tandy Color Computer 2 and 3, and CP/M machines; and for the Amiga.  If you
+Tandy Color Computer 2 and 3, and CP/M machines; and for the Amiga and
+MS-DOS PCs.  If you
 know vi or vim you know most of it already; this guide shows what is there
 and which keys to press on a Commodore (or TRS-80, or Color Computer) keyboard.  `docs/KEYS.md` lists every vi command with
 whether it is done.
@@ -51,10 +52,11 @@ whether it is done.
 | `p8vi-cpm.com` | CP/M 2.2 or later on a Z80, with a terminal (ANSI, VT52 or ADM-3A) | the TPA's room after the program (about 20 KB on the C128's CP/M 3) |
 | `p8vi-coco.bin` | Tandy Color Computer 1 or 2 with 64 KB and Disk BASIC (32 x 16 screen) | about 27 KB (in the RAM where the ROMs were) |
 | `p8vi-coco3.bin` | Tandy Color Computer 3 with Disk BASIC (80 x 24 screen) | about 27 KB |
+| `p8vi-dos.exe` | MS-DOS 2.0 or later on an IBM PC or compatible (an 8088 is enough), colour or monochrome 80 x 25 text screen | about 55 KB |
 | `p8vi-amiga` (and its icon, `p8vi-amiga.info`) | Amiga with Kickstart 1.3 or later (a 68000 is enough), in a Shell window or from Workbench | the largest free block of memory, less 32 KB: hundreds of KB, more than 64 KB too |
 
-The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M and Amiga
-versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
+The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M, Amiga and
+MS-DOS versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
 still being worked on.
 
 Load and run it like any program, for example on a C64:
@@ -91,6 +93,13 @@ On CP/M, copy `p8vi-cpm.com` as `P8VI.COM` and give the terminal:
 `p8vi -t adm3a` (the TRS-80 Model 4's Montezuma CP/M and many CP/M
 machines), `p8vi -t vt52`, or `p8vi` alone for ANSI (VT100 and later).
 `-40` is for a 40-column screen, such as the C128's 40-column one.
+
+On MS-DOS, copy `p8vi-dos.exe` as `P8VI.EXE` and type `p8vi`, or `p8vi
+name.txt` to edit a file.  File names are DOS's (`:e c:\notes\todo.txt`,
+`:w a:readme.txt`); new files get CR LF line endings, and a file's text
+ends at its first ^Z (an old editor's end of file mark; p8vi writes none).
+The arrow keys, Home, Backspace and Delete work as on the other versions,
+and Ctrl-C is an Escape too.
 
 On the Amiga, copy `p8vi-amiga` and `p8vi-amiga.info` to a disk (rename
 both, to `p8vi` and `p8vi.info`, if you like).  From a Shell or CLI,
@@ -533,7 +542,7 @@ The Color Computer versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII); they have everything else.
 
-The CP/M and Amiga versions leave out the disk commands (`:@`, `:@$`,
+The CP/M, Amiga and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII; ISO-8859-1 on the Amiga, whose accented letters show as `.` for
 now).  They have everything else.
