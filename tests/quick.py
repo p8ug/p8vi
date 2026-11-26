@@ -83,6 +83,8 @@ def jobs():
         'atari': [PY + ['tests/atari/atest.py', '--work', '{work}', 'files', 'delete-put', 'crlf', 'final-eol'],
                   PY + ['tests/atari/atest.py', '--work', '{work}', 'number', 'scroll-down']],
         'atarixe': [PY + ['tests/atari/atest.py', '--xe', '--work', '{work}', 'files', 'pages', 'delete-put']],
+        'atarist': [PY + ['tests/atarist/sttest.py', '--work', '{work}', 'files', 'delete-put', 'undo', 'crlf'],
+                    PY + ['tests/atarist/sttest.py', '--work', '{work}', 'number', 'scroll-down', 'long-page']],
         'amiga': [PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'files', 'delete-put', 'undo', 'zview'],
                   PY + ['tests/amiga/amigatest.py', '--work', '{work}', 'screen', 'long-page', 'scroll-mixed']],
     }

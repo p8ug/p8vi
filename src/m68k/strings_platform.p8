@@ -1,7 +1,7 @@
 ; strings routines the m68k targets' library doesn't have yet, which p8vi
-; uses: the same as the other targets' (the llvm targets' strings.p8),
-; merged into the library's strings block.  Dropped when the compiler's
-; m68k strings has them.
+; uses (the Amiga and Atari ST builds): the same as the other targets'
+; (the llvm targets' strings.p8), merged into the library's strings block.
+; Dropped when the compiler's m68k strings has them.
 
 %import strings
 

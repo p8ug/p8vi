@@ -125,7 +125,7 @@ aren't.
 
   Done: the rows after the text show vi's `~` (platform.init sets
   EMPTY_ROW, 5 bytes); in `release/` since v0.4.
-- **32-bit text positions** (done for the host and the Amiga):
+- **32-bit text positions** (done for the host, the Amiga and the Atari ST):
   `src/postype.p8` holds what depends on the width (`pos.SIZE`, `pos.NONE`,
   `pos.DIGITS`, `pos.print`, `pos.text`, `pos.parse`, `pos.TEXT_MAX`).  `make host`
   compiles the core from copies with `uword` made `long`
@@ -506,6 +506,37 @@ and editing then go about as with an REU.
     suites (not huge, bigundo: more than 62 pages; not marks, zview) and
     screen pass.  Not yet: :rec after a reset; DOS 2.5's RAMDISK.COM uses
     the same banks (D8:), not checked for.
+- **Atari ST** (`p8vi-atarist.tos`, `make atarist`; p8c's atarist target,
+  started 2026-11-26).  Built as the Amiga is: the wide core from
+  copies (encode_copy.py --wide --bytewise, build/stwide), src/cpm's
+  screen (txt.term VT52: the ST's console is a VT-52), src/trs80's
+  charset and store, src/m68k's strings (moved there from src/amiga), and
+  the library's diskio (GEMDOS handles).  src/atarist:
+  - console_platform: output buffered and sent with the BIOS's Bconout
+    (device 2), not GEMDOS: GEMDOS's console output checks for ^S and ^C
+    with Bconin, which takes typed keys (a Ctrl-C would end p8vi).  Keys
+    from Bconin, the arrows, Clr/Home and Undo by their scan codes
+    (Shift-up and -down: Kbshift, as Ctrl-B and Ctrl-F).  Wrap off while
+    p8vi runs (ESC w), so the last column can be written.
+  - platform: the text is the largest Malloc block less 16 KB (Mfree at
+    the end); the screen is 80 x 25, or 40 x 25 in the low resolution
+    (tos.rez); `p8vi [file]` from sys.argv (more than one argument or an
+    option: a usage line); CR LF for new files; paths with `\`.
+  - Tests (`make test-atarist`, tests/atarist/sttest.py): files 19,
+    screen 18 (high and low), number 22, endings 2, args 7 (through
+    tests/atarist/argsrun.p8: Pexec with a command tail, Hatari's --auto
+    has none) and big (1.3 MB, 70000 lines, edits past line 65535, 25 s)
+    pass on TOS 1.04, and files and screen on EmuTOS.  The screen is what
+    p8vi sends (OUT.LOG, played back by termplay.py as VT-52); the real
+    screen checked by hand from Hatari's screen memory (savebin $3f8000:
+    its screenshots lag a few frames).
+  - Tried by hand in Hatari from the desktop (2026-11-26): as P8VI.TOS,
+    text typed and saved; as P8VI.TTP with a file as its parameter, which
+    it opened.
+  - Not yet: tried on real hardware, or as an installed application for
+    .TXT files; the ST's characters above 127 (umlauts)
+    show as '.' (src/cpm/textio's put); the medium resolution is only in
+    the screen suites' --rez med.
 - **Host version** (`build/p8vi-host`, `make host`; llvm64 and clang;
   src/host with src/cpm's screen and src/trs80's charset).  A program for
   this machine in a terminal: `p8vi-host [-t ansi|vt52|adm3a] [-40]

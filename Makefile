@@ -45,6 +45,7 @@ COCO3TEST = tests/coco3/coco3test.py
 DOSTEST = tests/dos/dostest.py
 A2TEST = tests/appleii/a2test.py
 ATARITEST = tests/atari/atest.py
+STTEST = tests/atarist/sttest.py
 QUICKTEST = tests/quick.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
@@ -129,15 +130,18 @@ PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh
 # the wide core (32-bit text positions, up to pos.TEXT_MAX): compiled from
 # copies with uword made long (tools/encode_copy.py --wide), src/wide/postype.p8
 # first.  the host (llvm64: this machine, in a terminal); the Amiga (amiga500:
-# a 68000 and Kickstart 1.3), its undo records read a byte at a time
-# (--bytewise: a 68000 long must be at an even address).  both with src/cpm's
-# screen and src/trs80's charset, fastmem and store
+# a 68000 and Kickstart 1.3) and the Atari ST (atarist: a 68000 and TOS
+# 1.04, the VT-52 console), their undo records read a byte at a time
+# (--bytewise: a 68000 long must be at an even address), src/m68k's strings.
+# all with src/cpm's screen and src/trs80's charset, fastmem and store
 WIDEMODS = editor,buffer,gapbuffer,fastmem_platform,charset_platform
 WIDE_DIRS = src src/trs80
 HOSTWIDE = build/hostwide
 PCCARGSHOST = -srcdirs "src/wide:$(HOSTWIDE)/src:src/host:src/cpm:$(HOSTWIDE)/trs80" -target llvm64
 AMIGAWIDE = build/amigawide
-PCCARGSAMIGA = -srcdirs "src/wide:$(AMIGAWIDE)/src:src/amiga:src/cpm:$(AMIGAWIDE)/trs80" -map -target amiga500
+PCCARGSAMIGA = -srcdirs "src/wide:$(AMIGAWIDE)/src:src/amiga:src/m68k:src/cpm:$(AMIGAWIDE)/trs80" -map -target amiga500
+STWIDE = build/stwide
+PCCARGSATARIST = -srcdirs "src/wide:$(STWIDE)/src:src/atarist:src/m68k:src/cpm:$(STWIDE)/trs80" -map -target atarist
 # the virtual target (make test)
 PCCARGSVM = -srcdirs "src:src/virtual" -target virtual
 
@@ -151,13 +155,15 @@ PROGS = build/p8vi-c64.prg build/p8vi-c64reu.prg build/p8vi-c64disk.prg build/p8
 	build/p8vi-cx16.prg build/p8vi-cx16iso.prg build/p8vi-cx16ovl.prg build/p8vi-cx16isoovl.prg \
 	build/p8vi-mega65.prg build/p8vi-mega65dma.prg build/p8vi-plus4.prg build/p8vi-pet32.prg build/p8vi-vic20.prg \
 	build/p8vi-trs80.cmd build/p8vi-trs80m4.cmd build/p8vi-trs80m4x.cmd build/p8vi-cpm.com \
-	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys build/p8vi-atari.xex build/p8vi-atarixe.xex
+	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys build/p8vi-atari.xex build/p8vi-atarixe.xex \
+	build/p8vi-atarist.tos
 # the host's (not in the release: built for this machine)
 HOSTPROG = build/p8vi-host
 ALLPROGS = $(PROGS) $(HOSTPROG)
 # the test builds: they play the keys in a file first (features.KEYFILE)
 TESTPROGS = build/p8vi-cpmtest.com build/p8vi-trs80test.cmd build/p8vi-trs80m4test.cmd build/p8vi-trs80m4xtest.cmd \
-	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys build/p8vi-ataritest.xex build/p8vi-atarixetest.xex
+	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys build/p8vi-ataritest.xex build/p8vi-atarixetest.xex \
+	build/p8vi-ataristtest.tos
 # what the release has besides the programs
 EXTRAS = build/oscii.fnt build/p8vi-amiga.info
 
@@ -263,6 +269,15 @@ build/p8vi-amiga: src/p8vi_amiga.p8 $(SRCS) $(ENCODE_COPY)
 build/p8vi-amigatest: src/p8vi_amigatest.p8 $(SRCS) $(ENCODE_COPY)
 	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(AMIGAWIDE) $(WIDE_DIRS)
 	$(PCC) $(PCCARGSAMIGA) -o $@ $(AMIGAWIDE)/src/p8vi_amigatest.p8
+build/p8vi-atarist.tos: src/p8vi_atarist.p8 $(SRCS) $(ENCODE_COPY)
+	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(STWIDE) $(WIDE_DIRS)
+	$(PCC) $(PCCARGSATARIST) -o $@ $(STWIDE)/src/p8vi_atarist.p8
+build/p8vi-ataristtest.tos: src/p8vi_ataristtest.p8 $(SRCS) $(ENCODE_COPY)
+	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(STWIDE) $(WIDE_DIRS)
+	$(PCC) $(PCCARGSATARIST) -o $@ $(STWIDE)/src/p8vi_ataristtest.p8
+# (sttest.py args: starts p8vi with a command line)
+build/argsrun.tos: tests/atarist/argsrun.p8
+	$(PCC) -target atarist -o $@ $<
 
 # the C64 font build's font (OSCII: C64 OS + ASCII), and the Amiga's
 # Workbench icon (a tool icon, named as the program)
@@ -283,6 +298,7 @@ cpm: build/p8vi-cpm.com
 dos: build/p8vi-dos.exe
 appleii: build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
 atari: build/p8vi-atari.xex build/p8vi-atarixe.xex
+atarist: build/p8vi-atarist.tos
 coco: build/p8vi-coco.bin build/p8vi-coco3.bin
 host: build/p8vi-host
 amiga: build/p8vi-amiga build/p8vi-amiga.info
@@ -467,6 +483,21 @@ emu-atari: build/p8vi-atari.xex
 	$(CP) samples/*.txt $(ATARIDIR)
 	$(CP) samples/sampsmall.txt $(ATARIDIR)/sampsmal.txt
 	atari800 -xl -nobasic -hreadwrite -Hdevicename D -H1 $(ATARIDIR) -run $<
+# the Atari ST in Hatari (4 MB, monochrome: 80 x 25), with build/atarist and
+# the samples as drive C: (8.3 names: sampsmall.txt is sampsmal.txt too),
+# p8vi started from the desktop: :e sample.txt.  ST_TOS is the TOS image
+# (TOS 1.04 in ~/Emulation/AtariST if it's there), else Hatari's EmuTOS;
+# ST_REZ the monitor (mono; rgb for the low resolution, 40 x 25)
+STDIR = build/atarist
+ST_TOS ?= $(wildcard $(HOME)/Emulation/AtariST/TOS_104.IMG)
+ST_REZ ?= mono
+emu-atarist: build/p8vi-atarist.tos
+	$(MD) $(STDIR)
+	$(CP) $< $(STDIR)/P8VI.TOS
+	$(CP) samples/*.txt $(STDIR)
+	$(CP) samples/sampsmall.txt $(STDIR)/sampsmal.txt
+	hatari --machine st --memsize 4 --monitor $(ST_REZ) $(if $(ST_TOS),--tos "$(ST_TOS)") --fast-boot true \
+		--harddrive $(STDIR) --auto 'C:\P8VI.TOS'
 # the TRS-80 Model 4 with Montezuma Micro CP/M 2.2 in trs80gp: drive A a
 # copy of the system disk (CPM_DISK), drive B a new data disk with p8vi.com
 # and samples (tools/cpm/m4disk.py; made again each time, so edits there
@@ -519,7 +550,8 @@ emu-amiga-keyecho: build
 # everything: the virtual target's, every build's suites (an hour or more)
 TESTS = test test-host test-cpm test-c64 test-c64-screen test-c64reu test-c64disk test-c64font \
 	test-c128 test-c128x test-c128reu test-pet32 test-plus4 test-mega65 test-mega65dma \
-	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii test-atari
+	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii test-atari \
+	test-atarist
 test-all: $(TESTS)
 
 # the quick tier, for iterating: the virtual tests, the size checks, then one
@@ -579,6 +611,21 @@ test-atari: build/p8vi-ataritest.xex build/p8vi-atari.xex build/p8vi-atarixetest
 	$(PYTHON) -B $(ATARITEST) number
 	$(PYTHON) -B $(ATARITEST) --xe files
 	$(PYTHON) -B $(ATARITEST) --xe screen
+
+# the Atari ST in Hatari, without a window (skipped without it; TOS 1.04,
+# ST_TOS, else EmuTOS): the file suites, the screen suites against a full
+# redraw (the high resolution's 80 x 25, then the low one's 40 x 25), with
+# :set number, a new text's line endings, the command line, and a 1.3 MB
+# file of 70000 lines (tests/atarist/sttest.py, seconds each; big half a
+# minute)
+test-atarist: build/p8vi-ataristtest.tos build/p8vi-atarist.tos build/argsrun.tos
+	$(PYTHON) -B $(STTEST) files
+	$(PYTHON) -B $(STTEST) screen
+	$(PYTHON) -B $(STTEST) --rez low screen
+	$(PYTHON) -B $(STTEST) number
+	$(PYTHON) -B $(STTEST) endings
+	$(PYTHON) -B $(STTEST) args
+	$(PYTHON) -B $(STTEST) big
 
 # the Apple II in bobbin (tests/appleii/a2test.py): with DOS 3.3 (skipped
 # without bobbin, dos33 or the disk, A2_DISK) the file suites and the
@@ -802,7 +849,7 @@ test-coco3: build/p8vi-coco3test.bin
 # that p8c's -map writes (build/name.p8map), which knows where the
 # program must end (p8size MAP for where the bytes go, A.p8map B.p8map
 # to compare two).  p8vi-c64font must end below its font at $c800.  The
-# Z80 and Amiga builds have no fixed end (the text gets the heap): sizes
+# Z80, Amiga and Atari ST builds have no fixed end (the text gets the heap): sizes
 # only (the host build gets no map).  The overlay builds have no map: p8c's -meminfo, main
 # memory and each overlay
 VIC20_MIN_FREE = 64
@@ -837,13 +884,14 @@ size: $(PROGS)
 	$(P8SIZE) --map build/p8vi-prodosx.p8map
 	$(P8SIZE) --map build/p8vi-atari.p8map
 	$(P8SIZE) --map build/p8vi-atarixe.p8map
+	$(P8SIZE) --map build/p8vi-atarist.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)
 audit: $(PROGS)
 	$(PYTHON) $(ASMAUDIT) build/p8vi-c64.asm build/p8vi-c64reu.asm build/p8vi-c64font.asm build/p8vi-cx16.asm build/p8vi-vic20.asm
 
-.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii atari coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
+.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii atari atarist coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
 
 #
 # end-of-file

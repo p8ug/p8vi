@@ -3,7 +3,7 @@
 p8vi is a vi for 8-bit computers: the Commodore C64, VIC-20, PET, Plus/4
 and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, the
 Tandy Color Computer 2 and 3, the Apple II, the Atari 8-bit computers, and
-CP/M machines; and for the Amiga and MS-DOS PCs.  If you
+CP/M machines; and for the Amiga, the Atari ST and MS-DOS PCs.  If you
 know vi or vim you know most of it already; this guide shows what is there
 and which keys to press on a Commodore (or TRS-80, or Color Computer) keyboard.  `docs/KEYS.md` lists every vi command with
 whether it is done.
@@ -59,9 +59,10 @@ whether it is done.
 | `p8vi-atarixe.xex` | Atari 130XE, the same way (fewer features: see below) | up to about 62 KB (in the extra 64 KB) |
 | `p8vi-dos.exe` | MS-DOS 2.0 or later on an IBM PC or compatible (an 8088 is enough), colour or monochrome 80 x 25 text screen | about 55 KB |
 | `p8vi-amiga` (and its icon, `p8vi-amiga.info`) | Amiga with Kickstart 1.3 or later (a 68000 is enough), in a Shell window or from Workbench | the largest free block of memory, less 32 KB: hundreds of KB, more than 64 KB too |
+| `p8vi-atarist.tos` | Atari ST, STE or Mega ST with TOS 1.04 or later (or EmuTOS), any resolution | the largest free block of memory, less 16 KB: megabytes on a 4 MB ST |
 
 The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M, Amiga,
-MS-DOS, Apple II and Atari versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
+MS-DOS, Apple II, Atari and Atari ST versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
 still being worked on.
 
 Load and run it like any program, for example on a C64:
@@ -147,6 +148,15 @@ clicking any file's icon and then double-clicking p8vi's with `Shift`
 held.  The screen is the window's size, and follows it
 when you resize the window; `-s 80x24` gives a size instead.  New files
 get LF line endings, as AmigaOS's.
+
+On the Atari ST, copy `p8vi-atarist.tos` to a disk as `P8VI.TTP`: the
+desktop then asks for its parameters when you open it, and a file name
+there is the file to edit (as `p8vi name.txt` from a shell).  Installed
+as the application for `.TXT` files, it opens the one you double-click.
+As `P8VI.TOS` it starts with no file.  The screen is the resolution's: 80
+x 25 in the medium and high ones, 40 x 25 in the low one.  File names are
+GEMDOS's (`:e c:\notes\todo.txt`, `:w a:readme.txt`); new files get CR
+LF line endings, as TOS's.
 
 Then `:e name` opens a file (a name that isn't on the disk starts a new,
 empty file), and `:q` quits.  `Ctrl-G` shows how many lines there are and
@@ -237,6 +247,12 @@ BASIC's.
 and `Shift` + `↑` and `Shift` + `↓` page up and down (`Ctrl-B`,
 `Ctrl-F`); `Help` and the function keys do nothing.  `Ctrl-C` is `Esc`
 too.
+
+**The Atari ST's** keyboard has every key vi needs too: `Esc`,
+`Control`, and `Delete` and `Backspace` both delete.  The cursor keys
+move in every mode, `Shift` + `↑` and `Shift` + `↓` page up and down,
+`Clr/Home` is `0`, and `Undo` is `u`; `Help` and the function keys do
+nothing.  `Control-C` is `Esc` too.
 
 **The TRS-80 Model 4** has a `CTRL` key, so `Ctrl-F` is `CTRL` + `F`.
 `Esc` is `Shift` + `↑` or `BREAK`, and `←` is Backspace as on the Model
@@ -582,7 +598,7 @@ The Color Computer versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII); they have everything else.
 
-The CP/M, Amiga and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
+The CP/M, Amiga, Atari ST and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII; ISO-8859-1 on the Amiga, whose accented letters show as `.` for
 now).  They have everything else.

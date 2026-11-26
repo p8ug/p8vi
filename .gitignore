@@ -18,3 +18,5 @@ save/
 *.d64
 # temporary files
 temp/
+# Python compiled files.
+__pycache__/
