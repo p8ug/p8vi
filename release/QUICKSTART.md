@@ -2,7 +2,9 @@
 
 p8vi is a vi for 8-bit computers: the Commodore C64, VIC-20, PET, Plus/4
 and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, the
-Tandy Color Computer 2 and 3, and CP/M machines; and for the Amiga.  If you
+Tandy Color Computer 2 and 3, the Apple II, the Atari 8-bit computers, and
+CP/M machines; and for the Amiga, the Atari ST, the classic Macintosh and
+MS-DOS PCs.  If you
 know vi or vim you know most of it already; this guide shows what is there
 and which keys to press on a Commodore (or TRS-80, or Color Computer) keyboard.  `docs/KEYS.md` lists every vi command with
 whether it is done.
@@ -51,10 +53,18 @@ whether it is done.
 | `p8vi-cpm.com` | CP/M 2.2 or later on a Z80, with a terminal (ANSI, VT52 or ADM-3A) | the TPA's room after the program (about 20 KB on the C128's CP/M 3) |
 | `p8vi-coco.bin` | Tandy Color Computer 1 or 2 with 64 KB and Disk BASIC (32 x 16 screen) | about 27 KB (in the RAM where the ROMs were) |
 | `p8vi-coco3.bin` | Tandy Color Computer 3 with Disk BASIC (80 x 24 screen) | about 27 KB |
+| `p8vi-appleii.bin` | Apple IIe, IIc or IIgs (or a II Plus, without small letters) with DOS 3.3, 40 x 24 screen | about 5 KB |
+| `p8vi-prodos.sys` | the same with ProDOS, with every feature | about 10 KB |
+| `p8vi-prodosx.sys` | ProDOS with 128 KB (a IIe with an extended 80-column card, a IIc, a IIgs), with every feature | up to about 44 KB (in the auxiliary 64 KB) |
+| `p8vi-atari.xex` | Atari 800 with 48 KB, XL or XE, without BASIC, with a DOS (Atari DOS 2.5, MyDOS, SpartaDOS ...) | about 9 KB |
+| `p8vi-atarixe.xex` | Atari 130XE, the same way (fewer features: see below) | up to about 62 KB (in the extra 64 KB) |
+| `p8vi-dos.exe` | MS-DOS 2.0 or later on an IBM PC or compatible (an 8088 is enough), colour or monochrome 80 x 25 text screen | about 55 KB |
 | `p8vi-amiga` (and its icon, `p8vi-amiga.info`) | Amiga with Kickstart 1.3 or later (a 68000 is enough), in a Shell window or from Workbench | the largest free block of memory, less 32 KB: hundreds of KB, more than 64 KB too |
+| `p8vi-atarist.tos` | Atari ST, STE or Mega ST with TOS 1.04 or later (or EmuTOS), any resolution | the largest free block of memory, less 16 KB: megabytes on a 4 MB ST |
+| `p8vi-macplus.bin` | Macintosh Plus or later (a 68000 is enough) with System 4.1 or later: a MacBinary file of the application p8vi | the largest free block of its memory, less 32 KB: megabytes without MultiFinder, under MultiFinder or System 7 what its Get Info allows |
 
-The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M and Amiga
-versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
+The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M, Amiga,
+MS-DOS, Apple II, Atari, Atari ST and Macintosh versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
 still being worked on.
 
 Load and run it like any program, for example on a C64:
@@ -92,6 +102,45 @@ On CP/M, copy `p8vi-cpm.com` as `P8VI.COM` and give the terminal:
 machines), `p8vi -t vt52`, or `p8vi` alone for ANSI (VT100 and later).
 `-40` is for a 40-column screen, such as the C128's 40-column one.
 
+On the Apple II, put `p8vi-appleii.bin` on a DOS 3.3 disk as the B file
+`P8VI` (it starts with the address and length BSAVE writes; for example
+`dos33 disk.dsk SAVE B p8vi-appleii.bin P8VI` with dos33fsprogs) and
+`BRUN P8VI`.  Its files are DOS's T files (as Applesoft writes them),
+with CR line endings.  With ProDOS, put `p8vi-prodos.sys` on a ProDOS disk
+as the SYS file `P8VI.SYSTEM` (for `$2000`; with AppleCommander: `java
+-jar AppleCommander-ac.jar -p disk.po P8VI.SYSTEM SYS 0x2000 <
+p8vi-prodos.sys`) and type `-P8VI.SYSTEM` at BASIC.SYSTEM's prompt (or make
+it the disk's first .SYSTEM file; `p8vi-prodosx.sys` the same way, on a
+machine with 128 KB: it keeps the text in the auxiliary 64 KB, where
+ProDOS's `/RAM` disk would be, so it takes `/RAM` away until the next
+boot); its files are TXT files, and names may
+be paths (`:w /DATA/NOTES.TXT`).  The ProDOS version has every feature;
+the DOS 3.3 one has fewer (below).  On both, the arrows are the editor's arrows; the right
+arrow is Ctrl-U, so Ctrl-U (half a page up) is not there; the left arrow
+and DELETE delete in insert mode and on the `:` line, and Ctrl-C is an
+Escape too.  Use the 40-column screen (not `PR#3`).
+
+On the Atari, copy `p8vi-atari.xex` to a DOS disk and load it as a binary
+file (DOS 2.5's `L`, or name it `AUTORUN.SYS`), with BASIC off (hold
+OPTION while an XL or XE starts).  File names are the DOS's: `:e
+README.TXT` is `D1:README.TXT`, `:w D2:NOTES.TXT` another drive.  Text
+files are ATASCII, their lines ending with `$9b` (new files too; `:set
+cr`, `lf` or `crlf` for other machines' files, `:set atascii` back).  The
+arrows are CTRL with `-` `=` `+` `*`; DELETE BACK SPACE deletes; BREAK
+is an Escape too.  The rows past the end of the text show `-`: ATASCII
+has no `~`.  `p8vi-atarixe.xex` keeps the text in a 130XE's extra 64 KB
+(not with DOS 2.5's RAMDISK.COM, which uses the same memory); on another
+machine it says it needs a 130XE.  To have room for that it leaves out the
+start screen, scrolling one row at a time, `:set number`, marks and `zt`
+`zz` `zb`.
+
+On MS-DOS, copy `p8vi-dos.exe` as `P8VI.EXE` and type `p8vi`, or `p8vi
+name.txt` to edit a file.  File names are DOS's (`:e c:\notes\todo.txt`,
+`:w a:readme.txt`); new files get CR LF line endings, and a file's text
+ends at its first ^Z (an old editor's end of file mark; p8vi writes none).
+The arrow keys, Home, Backspace and Delete work as on the other versions,
+and Ctrl-C is an Escape too.
+
 On the Amiga, copy `p8vi-amiga` and `p8vi-amiga.info` to a disk (rename
 both, to `p8vi` and `p8vi.info`, if you like).  From a Shell or CLI,
 `p8vi-amiga name` edits in that window; from Workbench, double-clicking
@@ -101,6 +150,26 @@ clicking any file's icon and then double-clicking p8vi's with `Shift`
 held.  The screen is the window's size, and follows it
 when you resize the window; `-s 80x24` gives a size instead.  New files
 get LF line endings, as AmigaOS's.
+
+On the Atari ST, copy `p8vi-atarist.tos` to a disk as `P8VI.TTP`: the
+desktop then asks for its parameters when you open it, and a file name
+there is the file to edit (as `p8vi name.txt` from a shell).  Installed
+as the application for `.TXT` files, it opens the one you double-click.
+As `P8VI.TOS` it starts with no file.  The screen is the resolution's: 80
+x 25 in the medium and high ones, 40 x 25 in the low one.  File names are
+GEMDOS's (`:e c:\notes\todo.txt`, `:w a:readme.txt`); new files get CR
+LF line endings, as TOS's.
+
+On the Macintosh, unpack `p8vi-macplus.bin` (a MacBinary file: StuffIt
+Expander, or hfsutils' `hcopy -m` onto a disk image) into the application
+p8vi.  Double-click it to start with no file, or select a text file
+together with p8vi in the Finder and choose Open to edit that file.  The
+text is in a window of 80 x 25; the Apple menu has the desk accessories,
+and File, Quit is `:q` (it says so when the text has changes).  File
+names are the Macintosh's (`:e Notes`, `:e Disk:Letters:Mom`, `:e
+:Folder:name`), spaces and all; new files are TeachText's text files,
+with CR line endings.  Under MultiFinder the room for the text is what
+p8vi's Get Info gives it.
 
 Then `:e name` opens a file (a name that isn't on the disk starts a new,
 empty file), and `:q` quits.  `Ctrl-G` shows how many lines there are and
@@ -191,6 +260,21 @@ BASIC's.
 and `Shift` + `↑` and `Shift` + `↓` page up and down (`Ctrl-B`,
 `Ctrl-F`); `Help` and the function keys do nothing.  `Ctrl-C` is `Esc`
 too.
+
+**The Atari ST's** keyboard has every key vi needs too: `Esc`,
+`Control`, and `Delete` and `Backspace` both delete.  The cursor keys
+move in every mode, `Shift` + `↑` and `Shift` + `↓` page up and down,
+`Clr/Home` is `0`, and `Undo` is `u`; `Help` and the function keys do
+nothing.  `Control-C` is `Esc` too.
+
+**The Macintosh Plus's** keyboard has no `Esc` and no `Control`: `Enter`
+(or the keypad's `Clear`) is `Esc`, and `⌘` (command) with a letter is
+`Ctrl` with it (`⌘-F` is `Ctrl-F`, `⌘-[` is `Esc` too); `⌘-Q` is Quit, `⌘-.`
+is `Esc` as well.  The newer keyboards' `esc` and `control` work as they
+are.  `Delete` (and the extended keyboard's `del`) delete, the arrows move
+in every mode, and on the extended keyboard `home`, `page up` and `page
+down` are `0`, `Ctrl-B` and `Ctrl-F`.  The option key's characters can't
+be typed into the text yet.
 
 **The TRS-80 Model 4** has a `CTRL` key, so `Ctrl-F` is `CTRL` + `F`.
 `Esc` is `Shift` + `↑` or `BREAK`, and `←` is Backspace as on the Model
@@ -484,7 +568,10 @@ text.
 
 ## What some versions leave out
 
-The VIC-20 version has to fit in less memory, so it has none of these:
+The VIC-20 and Apple II DOS 3.3 versions have to fit in less memory, so
+they have none of these (the Apple II has `zt` `zz` `zb`, and treats a
+last line ending as the other versions do; its ProDOS version has them
+all):
 
 * `:s` replacing, and line ranges (`:%`, `:5,10`, `:$`, `:.`)
 * the disk commands `:@`, `:@$` and `:r $`
@@ -533,7 +620,7 @@ The Color Computer versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII); they have everything else.
 
-The CP/M and Amiga versions leave out the disk commands (`:@`, `:@$`,
+The CP/M, Amiga, Atari ST, Macintosh and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII; ISO-8859-1 on the Amiga, whose accented letters show as `.` for
 now).  They have everything else.
