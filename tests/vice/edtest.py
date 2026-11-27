@@ -195,7 +195,9 @@ FILE_SUITES = [
     ]),
     # :w with a drive prefix (features.PREFIX; not in every build): a new
     # file, then written over (2dd), then another, and no p8vi.tmp left
-    # (the temporary file goes to 0:p8vi.tmp, the rename is r0:x1=p8vi.tmp)
+    # (the temporary file goes to 0:p8vi.tmp, the rename is r0:x1=p8vi.tmp).
+    # The other machines' tests run it with their own prefix for 0:
+    # (tests/trs80/trstest.py's prefix_suite: d1:, c:, a volume's path ...)
     ('prefix', r':w 0:x1\n2dd:w 0:x1\n:w 0:x2\n', [
         ('p8vi.tmp', None),
         ('x1', b'THIRD, WITH PUNCT!\n\nFIFTH LINE'),

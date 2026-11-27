@@ -161,6 +161,7 @@ def main():
     wanted = lambda s: (not args.names or s[0] in args.names) and s[0] not in args.skip
     if args.kind == 'files':
         suites = [s for s in edtest.FILE_SUITES if wanted(s) and (args.names or s[0] not in trstest.CBM_ONLY)]
+        suites = trstest.with_prefix(suites, 'c:', wanted)
         run = run_files
     elif args.kind == 'screen':
         suites = [s for s in edtest.SCREEN_SUITES if wanted(s)]

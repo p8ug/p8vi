@@ -90,6 +90,26 @@ NEW_TEXTS = {('final-eol', 'new')}
 # the suites for CBM things: PETSCII and ASCII files, the C64's graphics
 # keys, CBM DOS commands and drive prefixes, a disk filled with c1541
 CBM_ONLY = ['ascii', 'g-cmds', 'read-dir', 'dos', 'prefix', 'save-full']
+
+
+def prefix_suite(prefix):
+    """edtest's prefix suite (:w to a name with a drive prefix, then over it,
+    then another file, and no p8vi.tmp left) with a build's own prefix for
+    CBM DOS's 0: (d1: on the Atari, c: on MS-DOS, a volume's path ...): the
+    safe save's temporary file and rename go there too"""
+    name, keys, expected, *rest = next(s for s in edtest.FILE_SUITES if s[0] == 'prefix')
+    return (name, keys.replace('0:', prefix), expected, *rest)
+
+
+def with_prefix(suites, prefix, wanted=lambda s: True):
+    """suites without edtest's prefix suite (CBM DOS's), and with it for a
+    build's own prefix (features.PREFIX) when it has one and it's wanted"""
+    out = [s for s in suites if s[0] != 'prefix']
+    if prefix is not None and wanted(('prefix',)):
+        out.append(prefix_suite(prefix))
+    return out
+
+
 # and what the Model III build leaves out for room (features.MARKS, Z_VIEW;
 # the Model 4 has them)
 NO_ROOM = ['marks', 'zview']

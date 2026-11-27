@@ -491,6 +491,9 @@ def main():
         suites = [s for s in edtest.FILE_SUITES
                   if (not args.names or s[0] in args.names) and s[0] not in args.skip
                   and (args.names or s[0] not in CBM_ONLY)]
+        # (the current drive, A:, is the directory; the host's ./)
+        suites = trstest.with_prefix(suites, './' if args.host else 'a:',
+                                     lambda s: (not args.names or s[0] in args.names) and s[0] not in args.skip)
         run = run_files
         if args.host:
             # (and the escape sequences: HOST_SUITES)

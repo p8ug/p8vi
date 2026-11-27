@@ -494,8 +494,11 @@ and editing then go about as with an REU.
     Fixed in p8p8's library (diskio.rename leaves the new name's device
     off).  Checked with :w d1:t2.txt (twice: over the file too) on the
     800XL and 130XE builds; atari800's H: had the same result as DOS 2.5
-    before the fix.
-    Not in a suite yet (no test saves with a device prefix).
+    before the fix.  Now in the file suites: edtest's prefix suite, with
+    each machine's own prefix (trstest.prefix_suite: d1: here, c: on
+    MS-DOS and the ST, a: on CP/M, ./ on the host, : on the Amiga, the
+    volume on ProDOS and the Macintosh), in every build with
+    features.PREFIX.
 - **Atari 130XE** (`p8vi-atarixe.xex`; src/atarixe: store_platform (the
   page store), pagemem_platform, xebank).  The extra 64 KB is four banks
   of 16 KB at $4000-$7fff (PORTB bits 2-3, bit 4 0 for the CPU, bit 5 left

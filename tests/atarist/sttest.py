@@ -277,6 +277,8 @@ def main():
     else:
         suites = [s for s in cpmtest.edtest.FILE_SUITES
                   if wanted(s) and (args.names or s[0] not in cpmtest.CBM_ONLY)]
+        # (drive C: is the directory)
+        suites = cpmtest.trstest.with_prefix(suites, 'c:', wanted)
         run = cpmtest.run_files
     if not suites:
         sys.exit('no such suite')

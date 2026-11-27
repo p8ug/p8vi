@@ -210,6 +210,8 @@ def main():
     if args.kind == 'files':
         suites = [s for s in edtest.FILE_SUITES + (edtest.REU_SUITES if args.xe else [])
                   if wanted(s) and (args.names or s[0] not in trstest.CBM_ONLY + no_room)]
+        # (D1: is the host device's directory)
+        suites = trstest.with_prefix(suites, 'd1:', wanted)
         run = run_files
     elif args.kind == 'screen':
         suites = [s for s in edtest.SCREEN_SUITES if wanted(s)]

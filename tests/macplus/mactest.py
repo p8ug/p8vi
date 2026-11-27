@@ -164,6 +164,13 @@ def mac(args, work, files, fetch):
     return problem, got
 
 
+def volume_name(disk):
+    """an HFS disk's name: the master directory block's (at 1024), drVN at 36"""
+    with open(disk, 'rb') as f:
+        mdb = f.read(1024 + 64)[1024:]
+    return mdb[37:37 + mdb[36]].decode('mac_roman')
+
+
 def mac_text(text):
     """a text with CR line endings (CR LF stays CR LF)"""
     return text.replace(b'\r\n', b'\0').replace(b'\n', b'\r').replace(b'\0', b'\r\n')
@@ -276,6 +283,8 @@ def main():
     wanted = lambda s: (not args.names or s[0] in args.names) and s[0] not in args.skip
     if args.kind == 'files':
         suites = [s for s in edtest.FILE_SUITES if wanted(s) and (args.names or s[0] not in trstest.CBM_ONLY)]
+        # (the full path of the folder p8vi is in: Disk:System Folder:)
+        suites = trstest.with_prefix(suites, volume_name(args.system) + ':System Folder:', wanted)
         run = run_files
     elif args.kind == 'screen':
         suites = [s for s in edtest.SCREEN_SUITES if wanted(s)]

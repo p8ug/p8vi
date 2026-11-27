@@ -186,6 +186,10 @@ def main():
     suites = [s for s in cpmtest.edtest.FILE_SUITES
               if (not args.names or s[0] in args.names) and s[0] not in args.skip
               and (args.names or s[0] not in cpmtest.CBM_ONLY)]
+    # (: is the root of the current directory's volume: Copperline's --run
+    # directory)
+    suites = cpmtest.trstest.with_prefix(
+        suites, ':', lambda s: (not args.names or s[0] in args.names) and s[0] not in args.skip)
     if not suites:
         sys.exit('no such suite')
     failed = 0

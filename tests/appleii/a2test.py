@@ -90,6 +90,9 @@ class Dos33:
     def dos33(self, disk, *a):
         return run([DOS33, '-y', disk] + list(a))
 
+    def prefix(self, disk):
+        return None     # (no features.PREFIX in the DOS 3.3 build)
+
     def prepare(self, disk):
         # (the disk as it is: the system master boots, loads Integer BASIC
         # and has about 170 sectors free after P8VI, plenty since p8c's
@@ -159,6 +162,13 @@ class Prodos:
             a = ['-p', disk, name, 'TXT']
         r = self.ac(*a, data=data)
         return '' if r.returncode == 0 else f'ac -p {name}: {(r.stdout + r.stderr).decode(errors="replace").strip()}'
+
+    def prefix(self, disk):
+        # (features.PREFIX: the volume's name, from ac -i's "Disk Name: /NAME/")
+        for line in self.ac('-i', disk).stdout.decode(errors='replace').splitlines():
+            if line.startswith('Disk Name:'):
+                return line.split(':', 1)[1].strip()
+        return None
 
     def get(self, work, disk, name):
         # (a file that isn't there: "NAME: No match." and status 0)
@@ -336,6 +346,9 @@ def main():
     if args.kind == 'files':
         suites = [s for s in edtest.FILE_SUITES + (edtest.REU_SUITES if args.prodosx else [])
                   if wanted(s) and (args.names or s[0] not in trstest.CBM_ONLY + args.dos.no_room)]
+        # (ProDOS: the boot disk's volume, /NAME/; DOS 3.3's build has no
+        # features.PREFIX)
+        suites = trstest.with_prefix(suites, args.dos.prefix(args.disk), wanted)
         run_suite = run_files
     elif args.kind == 'screen':
         suites = [s for s in edtest.SCREEN_SUITES if wanted(s)]
