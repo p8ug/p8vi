@@ -61,6 +61,7 @@ later.
 | `build/p8vi-coco.bin`, `build/p8vi-coco3.bin` | `src/p8vi_coco.p8`, `src/p8vi_coco3.p8` | Tandy Color Computer 2 (64 KB, all RAM) and 3 (80 columns), with Disk BASIC; `src/coco`, `src/coco3` |
 | `build/p8vi-amiga` | `src/p8vi_amiga.p8` | Amiga (amiga500: a 68000, Kickstart 1.3 or later) in its Shell window, or a window of its own from Workbench: the console is an ANSI terminal, the screen follows the window's size; the wide core (32-bit positions), text in the largest free block of memory; `src/amiga` (console, diskio), `make amiga`, `make emu-amiga`, in progress |
 | `build/p8vi-atarist.tos` | `src/p8vi_atarist.p8` | Atari ST (atarist: a 68000, TOS 1.04 or later, or EmuTOS), a GEMDOS program in the VT-52 console (`P8VI.TTP` asks for the file to edit): the 80 x 25 screen, 40 x 25 in the low resolution; the wide core (32-bit positions), text in the largest free block of memory; CR LF files, GEMDOS paths (`C:\DIR\NAME.TXT`); `src/atarist` with `src/m68k`'s strings, `make atarist`, `make emu-atarist` (Hatari), in progress |
+| `build/p8vi-macplus.bin` | `src/p8vi_macplus.p8` | the classic Macintosh (macplus: a Macintosh Plus or later with a 68000 or better, System 4.1 or later), an application whose text is in a window of 80 x 25 (a MacBinary file: the application p8vi, built as `build/macapp/p8vi.bin`); the editor's rows drawn into the window directly, the keys from the system's events; the wide core, text in the largest free block of the application's heap; CR files (TeachText's), Macintosh paths (`Disk:Folder:name`); `src/macplus` with `src/m68k`'s strings, `make macplus`, `make emu-macplus` (MAME), in progress |
 
 The editor itself is `src/editor.p8` (with `charset.p8`,
 `src/<target>/platform.p8` and a text store, `buffer.p8` plus
@@ -127,14 +128,16 @@ are the same as on the C64 font build, and MEGA with `:`, `.`, `;` and
   [DOSBox-X](https://dosbox-x.com/), and bobbin (Micah Cowan's Apple II emulator)
   with dos33fsprogs' `dos33` and a DOS 3.3 disk image (`A2_DISK`), and
   for ProDOS java with AppleCommander's `ac` jar (`AC_JAR`), atari800,
-  and Hatari (with a TOS image, `ST_TOS`, or its EmuTOS)
-  for the X16, MEGA65, TRS-80, CP/M, Color Computer, Amiga, MS-DOS, Apple II, Atari and Atari ST versions'
+  Hatari (with a TOS image, `ST_TOS`, or its EmuTOS), and MAME with
+  hfsutils (with the Macintosh Plus's ROMs, `MAC_ROMS`, and a system disk,
+  `MAC_SYSTEM`)
+  for the X16, MEGA65, TRS-80, CP/M, Color Computer, Amiga, MS-DOS, Apple II, Atari, Atari ST and Macintosh versions'
   runs and tests.  `make test` runs on prog8c-llvm's virtual machine and
   needs no emulator.
 
 p8vi's `Makefile` compiles every version with `p8c` (`PCC`): p8p8, a Prog8
 compiler written in Prog8, which builds the Commodore, X16, MEGA65,
-TRS-80, CP/M, Color Computer, Amiga, MS-DOS, Apple II, Atari, Atari ST and host versions, and writes the
+TRS-80, CP/M, Color Computer, Amiga, MS-DOS, Apple II, Atari, Atari ST, Macintosh and host versions, and writes the
 virtual target's IR for prog8c-llvm's `-vm` (`VM`).  Each program is
 compiled straight into its name (`-o`).
 `setup.py` expects `prog8c` in your `PATH`.  If you
@@ -204,6 +207,8 @@ The useful `make` targets are:
 | `make test-atari` | The file, screen and `:set number` suites on an 800XL in atari800 without a window (`tests/atari/atest.py`, seconds): its host device as D:, a breakpoint at `sys.exit` in its monitor to end each run; then the 130XE build's (`--xe`, with the page store suites) |
 | `make test-atarist` | The file, screen and `:set number` suites on a 4 MB ST with TOS 1.04 (`ST_TOS`, else EmuTOS) in Hatari without a window (`tests/atarist/sttest.py`, seconds): the directory as drive C:, the debugger ends each run at the program's Pterm; the screen from what the test build sends to the console (also written to `OUT.LOG`) played back as a VT-52 screen, in the high and the low resolution; a new text's line endings, the command line (through a parent program, `tests/atarist/argsrun.p8`) and a 1.3 MB file of 70000 lines |
 | `make emu-atarist` | Run the Atari ST version in Hatari (`ST_TOS`, `ST_REZ`) with the samples on drive C: |
+| `make test-macplus` | The file, screen and `:set number` suites, and a new text's line endings, on a Macintosh Plus in MAME without a window (`tests/macplus/mactest.py`, seconds each): p8vi as the Finder on a copy of a system disk (`MAC_SYSTEM`, System 6.0.8's System Tools by default; `MAC_ROMS` the ROMs), its files put on and read back with hfsutils; the screen from the window's characters the test build writes at a `$ff` key |
+| `make emu-macplus` | Run the Macintosh version in MAME, on a copy of the system disk with p8vi and the samples |
 | `make test-host` | The same suites for the host version with the keys piped in, a 4.5 MB file, and the window resized in a pty (`cpmtest.py --host`) |
 | `make test-amiga` | `tests/vice/edtest.py`'s file and screen suites and the `:set number` ones on an A500 in Copperline, Kickstart 1.3 or AROS (`tests/amiga/amigatest.py`: the screen from p8vi's output redirected to a file, `p8vi >out.log`; ~1 min), and with 1.3 the window resized while p8vi runs |
 | `make emu-amiga` | Run the Amiga version in Copperline with `sample.txt` |

@@ -125,7 +125,7 @@ aren't.
 
   Done: the rows after the text show vi's `~` (platform.init sets
   EMPTY_ROW, 5 bytes); in `release/` since v0.4.
-- **32-bit text positions** (done for the host, the Amiga and the Atari ST):
+- **32-bit text positions** (done for the host, the Amiga, the Atari ST and the Macintosh):
   `src/postype.p8` holds what depends on the width (`pos.SIZE`, `pos.NONE`,
   `pos.DIGITS`, `pos.print`, `pos.text`, `pos.parse`, `pos.TEXT_MAX`).  `make host`
   compiles the core from copies with `uword` made `long`
@@ -537,6 +537,44 @@ and editing then go about as with an REU.
     .TXT files; the ST's characters above 127 (umlauts)
     show as '.' (src/cpm/textio's put); the medium resolution is only in
     the screen suites' --rez med.
+- **Classic Macintosh** (`p8vi-macplus.bin`, `make macplus`; p8c's macplus
+  target, started 2026-11-26).  The wide core from copies (build/macwide,
+  as the ST's), src/trs80's charset and store, src/m68k's strings, the
+  library's diskio (the File Manager) and txt (its window, 80 x 25 in
+  Monaco 9): not src/cpm's screen.  src/macplus/platform.p8:
+  - The editor's rows go into the window directly, as the DOS version's
+    into the video RAM: put_row fills macos.screen's row and draws it with
+    one DrawText; scroll_rows is ScrollRect and row copies.  DOS_CURSOR:
+    the cursor is the library's txt position, inverted and blinking while
+    a key is waited for.
+  - Keys from the system's events, read in the platform (not txt.chrin,
+    which makes Return a newline and command keys the menus'): the arrows
+    by their characters, Enter/Clear and command-[ Escape, command and a
+    letter its control code, command-period RUN/STOP; Home, Page Up and
+    Down by key code.  The menu's Quit and command-Q type Escape and :q.
+    Clicks and updates as the library's (desk accessories, dragging).
+  - The text: _MaxMem less 32 KB, _NewPtr (DisposPtr at the end).
+    macos.quit_at_end, so the window doesn't wait for a key at the end.
+    The Finder's document (AppParmHandle's first file): its folder made
+    the current one (HSetVol with its working directory), then :e name.
+    New files CR, TeachText's (TEXT/ttxt).
+  - Tests (`make test-macplus`, tests/macplus/mactest.py, MAME macplus
+    without a window, p8vi as the Finder on a copy of System 6.0.8's
+    System Tools disk, files in and out with hfsutils): files 19, screen
+    18 (the window's characters, SCREENn.BIN at $ff), number 22, endings
+    2 pass.  MAME runs on two seconds after the program's end (P8P8DONE
+    in Scratch8), or the last track written may not be in the image.  On
+    System 4.2 (the "System 5.0" disk) 4 screen suites lose the first
+    block of a screen dump (NULs on the disk): not seen with 6.0.8.
+  - Tried by hand (2026-11-26): a document selected with p8vi and
+    opened from the Finder loads; :w to a Disk:Folder:file path saves;
+    under System 7.5.5 (MultiFinder) Get Info's 304 KB preferred size is
+    what About This Macintosh shows, and Ctrl-G's room fits it.
+  - Not yet: tried on real hardware; the menus and desk accessories
+    checked one by one; a big-file test (a 800 KB disk holds no 1.3 MB file: a hard
+    disk image); characters above 127 are shown (Mac Roman) but can't be
+    typed (option keys are dropped: the editor's codes above 127 are
+    keys); the window's size is the library's (80 x 25, not resizable).
 - **Host version** (`build/p8vi-host`, `make host`; llvm64 and clang;
   src/host with src/cpm's screen and src/trs80's charset).  A program for
   this machine in a terminal: `p8vi-host [-t ansi|vt52|adm3a] [-40]

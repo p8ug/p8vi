@@ -3,7 +3,8 @@
 p8vi is a vi for 8-bit computers: the Commodore C64, VIC-20, PET, Plus/4
 and C128, the Commander X16, the MEGA65, the TRS-80 Model III and 4, the
 Tandy Color Computer 2 and 3, the Apple II, the Atari 8-bit computers, and
-CP/M machines; and for the Amiga, the Atari ST and MS-DOS PCs.  If you
+CP/M machines; and for the Amiga, the Atari ST, the classic Macintosh and
+MS-DOS PCs.  If you
 know vi or vim you know most of it already; this guide shows what is there
 and which keys to press on a Commodore (or TRS-80, or Color Computer) keyboard.  `docs/KEYS.md` lists every vi command with
 whether it is done.
@@ -60,9 +61,10 @@ whether it is done.
 | `p8vi-dos.exe` | MS-DOS 2.0 or later on an IBM PC or compatible (an 8088 is enough), colour or monochrome 80 x 25 text screen | about 55 KB |
 | `p8vi-amiga` (and its icon, `p8vi-amiga.info`) | Amiga with Kickstart 1.3 or later (a 68000 is enough), in a Shell window or from Workbench | the largest free block of memory, less 32 KB: hundreds of KB, more than 64 KB too |
 | `p8vi-atarist.tos` | Atari ST, STE or Mega ST with TOS 1.04 or later (or EmuTOS), any resolution | the largest free block of memory, less 16 KB: megabytes on a 4 MB ST |
+| `p8vi-macplus.bin` | Macintosh Plus or later (a 68000 is enough) with System 4.1 or later: a MacBinary file of the application p8vi | the largest free block of its memory, less 32 KB: megabytes without MultiFinder, under MultiFinder or System 7 what its Get Info allows |
 
 The MEGA65, PET, Plus/4, C128, TRS-80, Color Computer, CP/M, Amiga,
-MS-DOS, Apple II, Atari and Atari ST versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
+MS-DOS, Apple II, Atari, Atari ST and Macintosh versions, the X16's ISO and overlay builds, and `p8vi-c64disk` are new and
 still being worked on.
 
 Load and run it like any program, for example on a C64:
@@ -157,6 +159,17 @@ As `P8VI.TOS` it starts with no file.  The screen is the resolution's: 80
 x 25 in the medium and high ones, 40 x 25 in the low one.  File names are
 GEMDOS's (`:e c:\notes\todo.txt`, `:w a:readme.txt`); new files get CR
 LF line endings, as TOS's.
+
+On the Macintosh, unpack `p8vi-macplus.bin` (a MacBinary file: StuffIt
+Expander, or hfsutils' `hcopy -m` onto a disk image) into the application
+p8vi.  Double-click it to start with no file, or select a text file
+together with p8vi in the Finder and choose Open to edit that file.  The
+text is in a window of 80 x 25; the Apple menu has the desk accessories,
+and File, Quit is `:q` (it says so when the text has changes).  File
+names are the Macintosh's (`:e Notes`, `:e Disk:Letters:Mom`, `:e
+:Folder:name`), spaces and all; new files are TeachText's text files,
+with CR line endings.  Under MultiFinder the room for the text is what
+p8vi's Get Info gives it.
 
 Then `:e name` opens a file (a name that isn't on the disk starts a new,
 empty file), and `:q` quits.  `Ctrl-G` shows how many lines there are and
@@ -253,6 +266,15 @@ too.
 move in every mode, `Shift` + `↑` and `Shift` + `↓` page up and down,
 `Clr/Home` is `0`, and `Undo` is `u`; `Help` and the function keys do
 nothing.  `Control-C` is `Esc` too.
+
+**The Macintosh Plus's** keyboard has no `Esc` and no `Control`: `Enter`
+(or the keypad's `Clear`) is `Esc`, and `⌘` (command) with a letter is
+`Ctrl` with it (`⌘-F` is `Ctrl-F`, `⌘-[` is `Esc` too); `⌘-Q` is Quit, `⌘-.`
+is `Esc` as well.  The newer keyboards' `esc` and `control` work as they
+are.  `Delete` (and the extended keyboard's `del`) delete, the arrows move
+in every mode, and on the extended keyboard `home`, `page up` and `page
+down` are `0`, `Ctrl-B` and `Ctrl-F`.  The option key's characters can't
+be typed into the text yet.
 
 **The TRS-80 Model 4** has a `CTRL` key, so `Ctrl-F` is `CTRL` + `F`.
 `Esc` is `Shift` + `↑` or `BREAK`, and `←` is Backspace as on the Model
@@ -598,7 +620,7 @@ The Color Computer versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII); they have everything else.
 
-The CP/M, Amiga, Atari ST and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
+The CP/M, Amiga, Atari ST, Macintosh and MS-DOS versions leave out the disk commands (`:@`, `:@$`,
 `:r $`), recovery, and `:set ascii` and `:set petscii` (their files are
 ASCII; ISO-8859-1 on the Amiga, whose accented letters show as `.` for
 now).  They have everything else.

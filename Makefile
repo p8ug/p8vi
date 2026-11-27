@@ -46,6 +46,7 @@ DOSTEST = tests/dos/dostest.py
 A2TEST = tests/appleii/a2test.py
 ATARITEST = tests/atari/atest.py
 STTEST = tests/atarist/sttest.py
+MACTEST = tests/macplus/mactest.py
 QUICKTEST = tests/quick.py
 ASMAUDIT = tools/asmaudit.py
 MKFONT = tools/mkfont.py
@@ -130,10 +131,12 @@ PCCARGSCOCO3 = -srcdirs "src:src/coco3:src/coco" -map -target coco3ram -varshigh
 # the wide core (32-bit text positions, up to pos.TEXT_MAX): compiled from
 # copies with uword made long (tools/encode_copy.py --wide), src/wide/postype.p8
 # first.  the host (llvm64: this machine, in a terminal); the Amiga (amiga500:
-# a 68000 and Kickstart 1.3) and the Atari ST (atarist: a 68000 and TOS
-# 1.04, the VT-52 console), their undo records read a byte at a time
+# a 68000 and Kickstart 1.3), the Atari ST (atarist: a 68000 and TOS
+# 1.04, the VT-52 console) and the classic Macintosh (macplus: a Macintosh
+# Plus, System 4.1 or later), their undo records read a byte at a time
 # (--bytewise: a 68000 long must be at an even address), src/m68k's strings.
-# all with src/cpm's screen and src/trs80's charset, fastmem and store
+# all with src/trs80's charset, fastmem and store; all but the Macintosh
+# (its window is the library's txt) with src/cpm's screen
 WIDEMODS = editor,buffer,gapbuffer,fastmem_platform,charset_platform
 WIDE_DIRS = src src/trs80
 HOSTWIDE = build/hostwide
@@ -142,6 +145,8 @@ AMIGAWIDE = build/amigawide
 PCCARGSAMIGA = -srcdirs "src/wide:$(AMIGAWIDE)/src:src/amiga:src/m68k:src/cpm:$(AMIGAWIDE)/trs80" -map -target amiga500
 STWIDE = build/stwide
 PCCARGSATARIST = -srcdirs "src/wide:$(STWIDE)/src:src/atarist:src/m68k:src/cpm:$(STWIDE)/trs80" -map -target atarist
+MACWIDE = build/macwide
+PCCARGSMACPLUS = -srcdirs "src/wide:$(MACWIDE)/src:src/macplus:src/m68k:$(MACWIDE)/trs80" -map -target macplus
 # the virtual target (make test)
 PCCARGSVM = -srcdirs "src:src/virtual" -target virtual
 
@@ -156,14 +161,14 @@ PROGS = build/p8vi-c64.prg build/p8vi-c64reu.prg build/p8vi-c64disk.prg build/p8
 	build/p8vi-mega65.prg build/p8vi-mega65dma.prg build/p8vi-plus4.prg build/p8vi-pet32.prg build/p8vi-vic20.prg \
 	build/p8vi-trs80.cmd build/p8vi-trs80m4.cmd build/p8vi-trs80m4x.cmd build/p8vi-cpm.com \
 	build/p8vi-coco.bin build/p8vi-coco3.bin build/p8vi-amiga build/p8vi-dos.exe build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys build/p8vi-atari.xex build/p8vi-atarixe.xex \
-	build/p8vi-atarist.tos
+	build/p8vi-atarist.tos build/p8vi-macplus.bin
 # the host's (not in the release: built for this machine)
 HOSTPROG = build/p8vi-host
 ALLPROGS = $(PROGS) $(HOSTPROG)
 # the test builds: they play the keys in a file first (features.KEYFILE)
 TESTPROGS = build/p8vi-cpmtest.com build/p8vi-trs80test.cmd build/p8vi-trs80m4test.cmd build/p8vi-trs80m4xtest.cmd \
 	build/p8vi-amigatest build/p8vi-cocotest.bin build/p8vi-coco3test.bin build/p8vi-dostest.exe build/p8vi-appleiitest.bin build/p8vi-prodostest.sys build/p8vi-prodosxtest.sys build/p8vi-ataritest.xex build/p8vi-atarixetest.xex \
-	build/p8vi-ataristtest.tos
+	build/p8vi-ataristtest.tos build/p8vi-macplustest.bin
 # what the release has besides the programs
 EXTRAS = build/oscii.fnt build/p8vi-amiga.info
 
@@ -276,6 +281,17 @@ build/p8vi-ataristtest.tos: src/p8vi_ataristtest.p8 $(SRCS) $(ENCODE_COPY)
 	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(STWIDE) $(WIDE_DIRS)
 	$(PCC) $(PCCARGSATARIST) -o $@ $(STWIDE)/src/p8vi_ataristtest.p8
 # (sttest.py args: starts p8vi with a command line)
+# the Macintosh's: a MacBinary file, the application in it named as the
+# file p8c wrote (build/macapp/p8vi.bin: the application p8vi)
+build/p8vi-macplus.bin: src/p8vi_macplus.p8 $(SRCS) $(ENCODE_COPY)
+	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(MACWIDE) $(WIDE_DIRS)
+	$(MD) build/macapp
+	$(PCC) $(PCCARGSMACPLUS) -o build/macapp/p8vi.bin $(MACWIDE)/src/p8vi_macplus.p8
+	$(CP) build/macapp/p8vi.bin $@
+build/p8vi-macplustest.bin: src/p8vi_macplustest.p8 $(SRCS) $(ENCODE_COPY)
+	$(PYTHON) $(ENCODE_COPY) --wide $(WIDEMODS) --bytewise $(MACWIDE) $(WIDE_DIRS)
+	$(PCC) $(PCCARGSMACPLUS) -o $@ $(MACWIDE)/src/p8vi_macplustest.p8
+
 build/argsrun.tos: tests/atarist/argsrun.p8
 	$(PCC) -target atarist -o $@ $<
 
@@ -299,6 +315,7 @@ dos: build/p8vi-dos.exe
 appleii: build/p8vi-appleii.bin build/p8vi-prodos.sys build/p8vi-prodosx.sys
 atari: build/p8vi-atari.xex build/p8vi-atarixe.xex
 atarist: build/p8vi-atarist.tos
+macplus: build/p8vi-macplus.bin
 coco: build/p8vi-coco.bin build/p8vi-coco3.bin
 host: build/p8vi-host
 amiga: build/p8vi-amiga build/p8vi-amiga.info
@@ -498,6 +515,26 @@ emu-atarist: build/p8vi-atarist.tos
 	$(CP) samples/sampsmall.txt $(STDIR)/sampsmal.txt
 	hatari --machine st --memsize 4 --monitor $(ST_REZ) $(if $(ST_TOS),--tos "$(ST_TOS)") --fast-boot true \
 		--harddrive $(STDIR) --auto 'C:\P8VI.TOS'
+# the Macintosh Plus in MAME, in a window: a copy of the system disk
+# (MAC_SYSTEM: System 6.0.8's System Tools, its Installer and the files
+# beside the System Folder gone for room) with p8vi and the samples (as
+# TeachText's text files), build/macplus.dsk (made again each time, so
+# edits there aren't kept).  Double-click p8vi, or select a sample and p8vi
+# and choose Open.  MAC_ROMS is MAME's ROM directory (macplus, and the
+# keyboard's mackbd_m0110a)
+MAC_ROMS ?= $(HOME)/Emulation/Classic/ROM
+MAC_SYSTEM ?= $(HOME)/Emulation/Classic/Work/System Tools.img
+MACDISK = build/macplus.dsk
+emu-macplus: build/p8vi-macplus.bin
+	$(PYTHON) -c "import sys; d = open(sys.argv[1], 'rb').read(819200); open(sys.argv[2], 'wb').write(d)" "$(MAC_SYSTEM)" $(MACDISK)
+	HOME=$(abspath build) hmount $(MACDISK)
+	-HOME=$(abspath build) hdel Installer "Installer Script" "Read Me"
+	HOME=$(abspath build) hcopy -m build/macapp/p8vi.bin :
+	for f in samples/*.txt; do HOME=$(abspath build) hcopy -t $$f :$$(basename $$f) && \
+		HOME=$(abspath build) hattrib -t TEXT -c ttxt :$$(basename $$f) || exit 1; done
+	HOME=$(abspath build) humount
+	mame macplus -rompath "$(MAC_ROMS)" -flop1 $(MACDISK) -window -nomaximize -skip_gameinfo
+
 # the TRS-80 Model 4 with Montezuma Micro CP/M 2.2 in trs80gp: drive A a
 # copy of the system disk (CPM_DISK), drive B a new data disk with p8vi.com
 # and samples (tools/cpm/m4disk.py; made again each time, so edits there
@@ -551,7 +588,7 @@ emu-amiga-keyecho: build
 TESTS = test test-host test-cpm test-c64 test-c64-screen test-c64reu test-c64disk test-c64font \
 	test-c128 test-c128x test-c128reu test-pet32 test-plus4 test-mega65 test-mega65dma \
 	test-trs80 test-trs80m4 test-trs80m4x test-amiga test-coco test-coco3 test-dos test-appleii test-atari \
-	test-atarist
+	test-atarist test-macplus
 test-all: $(TESTS)
 
 # the quick tier, for iterating: the virtual tests, the size checks, then one
@@ -626,6 +663,16 @@ test-atarist: build/p8vi-ataristtest.tos build/p8vi-atarist.tos build/argsrun.to
 	$(PYTHON) -B $(STTEST) endings
 	$(PYTHON) -B $(STTEST) args
 	$(PYTHON) -B $(STTEST) big
+
+# the Macintosh Plus in MAME, without a window (skipped without it, or
+# without MAC_SYSTEM: System 6.0.8's System Tools disk by default): the file
+# suites, the screen suites against a full redraw, with :set number, and a
+# new text's line endings (tests/macplus/mactest.py, a few seconds each)
+test-macplus: build/p8vi-macplustest.bin
+	$(PYTHON) -B $(MACTEST) files
+	$(PYTHON) -B $(MACTEST) screen
+	$(PYTHON) -B $(MACTEST) number
+	$(PYTHON) -B $(MACTEST) endings
 
 # the Apple II in bobbin (tests/appleii/a2test.py): with DOS 3.3 (skipped
 # without bobbin, dos33 or the disk, A2_DISK) the file suites and the
@@ -849,7 +896,7 @@ test-coco3: build/p8vi-coco3test.bin
 # that p8c's -map writes (build/name.p8map), which knows where the
 # program must end (p8size MAP for where the bytes go, A.p8map B.p8map
 # to compare two).  p8vi-c64font must end below its font at $c800.  The
-# Z80, Amiga and Atari ST builds have no fixed end (the text gets the heap): sizes
+# Z80, Amiga, Atari ST and Macintosh builds have no fixed end (the text gets the heap): sizes
 # only (the host build gets no map).  The overlay builds have no map: p8c's -meminfo, main
 # memory and each overlay
 VIC20_MIN_FREE = 64
@@ -885,13 +932,14 @@ size: $(PROGS)
 	$(P8SIZE) --map build/p8vi-atari.p8map
 	$(P8SIZE) --map build/p8vi-atarixe.p8map
 	$(P8SIZE) --map build/p8vi-atarist.p8map
+	$(P8SIZE) --map build/macapp/p8vi.p8map
 
 # look in the generated assembler for the silent miscompiles found so far
 # (bugs/uword_array_eq_ubyte.p8, bugs/min_ubyte_expressions.p8)
 audit: $(PROGS)
 	$(PYTHON) $(ASMAUDIT) build/p8vi-c64.asm build/p8vi-c64reu.asm build/p8vi-c64font.asm build/p8vi-cx16.asm build/p8vi-vic20.asm
 
-.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii atari atarist coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
+.PHONY: all build clean release disk font c64 cx16 trs80 trs80m4 trs80m4x cpm dos appleii atari atarist macplus coco host amiga x16-dir frehd-dir amiga-dir quick test-all $(TESTS)
 
 #
 # end-of-file
