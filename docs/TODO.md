@@ -484,11 +484,18 @@ and editing then go about as with an REU.
     number, all pass, about a second each: atari800 -turbo with SDL's
     dummy drivers (no window), the host device as D: (-Hdevicename D -H1
     dir -hreadwrite), started in its monitor with a breakpoint at
-    sys.exit, then quit.  So no DOS: the CIO calls are the same, but not
-    tried under a real DOS 2.5 yet (MEMLO, its rename).  The DOS25.XFD at
-    hand confuses atr (dos2fs) already, so a disk made with it doesn't
-    boot right; with -run, atari800 loads the program without booting the
-    disk, so D: has no DOS then.
+    sys.exit, then quit.  So no DOS in the tests: the CIO calls are the
+    same.  (atr/dos2fs corrupted the DOS25.XFD at hand; dir2atr's images
+    work.)
+  - Tried by hand under DOS 2.5 in atari800 (2026-11-26): P8VI.XEX on D2:
+    (a dir2atr image) loaded with DUP's L, edited, saved to D1: and back
+    to DOS.  :w d2:name saved as a file "D2": diskio.rename gave DOS
+    "D2:P8VI.TMP,D2:NAME" and DOS 2.5 takes the new name up to its ':'.
+    Fixed in p8p8's library (diskio.rename leaves the new name's device
+    off).  Checked with :w d1:t2.txt (twice: over the file too) on the
+    800XL and 130XE builds; atari800's H: had the same result as DOS 2.5
+    before the fix.
+    Not in a suite yet (no test saves with a device prefix).
 - **Atari 130XE** (`p8vi-atarixe.xex`; src/atarixe: store_platform (the
   page store), pagemem_platform, xebank).  The extra 64 KB is four banks
   of 16 KB at $4000-$7fff (PORTB bits 2-3, bit 4 0 for the CPU, bit 5 left
